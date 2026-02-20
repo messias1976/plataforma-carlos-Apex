@@ -24,20 +24,25 @@ async function apiRequest(endpoint, options = {}) {
         headers,
     });
 
-    const contentType = response.headers.get('content-type') || '';
+    const rawBody = await response.text();
+    const hasBody = rawBody && rawBody.trim().length > 0;
+    let data = null;
 
-    if (!contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Response não é JSON: ${text.substring(0, 200)}`);
+    if (hasBody) {
+        try {
+            data = JSON.parse(rawBody);
+        } catch (parseError) {
+            const bodyPreview = rawBody.substring(0, 200);
+            throw new Error(`Resposta inválida do servidor (esperado JSON, HTTP ${response.status}): ${bodyPreview}`);
+        }
     }
-
-    const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.error || `HTTP ${response.status}`);
+        const message = data?.error || data?.message || `HTTP ${response.status}`;
+        throw new Error(message);
     }
 
-    return data;
+    return data ?? {};
 }
 
 // Subjects API

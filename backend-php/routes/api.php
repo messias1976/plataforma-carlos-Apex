@@ -1,4 +1,5 @@
 <?php
+
 // backend-php/routes/api.php
 
 // Router simples
@@ -26,7 +27,6 @@ require_once __DIR__ . '/../controllers/TopicsController.php';
 require_once __DIR__ . '/../controllers/TopicContentController.php';
 require_once __DIR__ . '/../controllers/SubscriptionsController.php';
 require_once __DIR__ . '/../controllers/UserController.php';
-require_once __DIR__ . '/../controllers/UploadsController.php';
 
 // Parse route
 $parts = explode('/', rtrim($path, '/'));
@@ -161,6 +161,17 @@ try {
     }
     // Uploads Routes
     elseif ($resource === 'uploads') {
+        if (!class_exists('UploadsController')) {
+            $uploadsControllerPath = __DIR__ . '/../controllers/UploadsController.php';
+            if (file_exists($uploadsControllerPath)) {
+                require_once $uploadsControllerPath;
+            }
+        }
+
+        if (!class_exists('UploadsController')) {
+            respondError('Uploads não configurado no servidor. Publique backend-php/controllers/UploadsController.php', 503);
+        }
+
         if ($method === 'POST' && !$id) {
             UploadsController::upload();
         } elseif ($method === 'GET' && $id) {

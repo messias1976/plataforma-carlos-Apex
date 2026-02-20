@@ -21,9 +21,10 @@ export const useSubscription = () => {
 
     console.log('useSubscription: Fetching subscription for user:', userId);
     try {
-      const data = await api.subscriptions.getByUserId(userId);
-      console.log('useSubscription: Fetched subscription:', data);
-      setSubscription(data);
+      const response = await api.subscriptions.getByUserId(userId);
+      const subscriptionData = response?.data ?? null;
+      console.log('useSubscription: Fetched subscription:', subscriptionData);
+      setSubscription(subscriptionData);
     } catch (err) {
       console.error("Error in useSubscription:", err);
       setSubscription(null);

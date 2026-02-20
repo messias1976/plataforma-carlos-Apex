@@ -1,9 +1,17 @@
 <?php
 // backend-php/index.php
 
-// Enable error reporting for debugging (REMOVER EM PRODUÇÃO)
+// Erros em JSON: loga no servidor e evita HTML no body da API
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
+set_error_handler(function ($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 
 // Load environment variables
 if (file_exists(__DIR__ . '/.env')) {

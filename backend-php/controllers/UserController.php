@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/../models/User.php';
 
+if (!class_exists('UserController')) {
 class UserController {
     public static function getProfile() {
         $user = requireAuth();
@@ -54,6 +55,7 @@ class UserController {
             respondError($e->getMessage(), 500);
         }
     }
+}
 }
 
 ?>

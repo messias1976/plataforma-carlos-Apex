@@ -1,5 +1,6 @@
 <?php
 
+if (!class_exists('UploadsController')) {
 class UploadsController {
     private static function uploadsDir() {
         return dirname(__DIR__) . '/uploads';
@@ -78,4 +79,5 @@ class UploadsController {
         readfile($fullPath);
         exit;
     }
+}
 }
