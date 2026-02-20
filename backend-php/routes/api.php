@@ -26,6 +26,7 @@ require_once __DIR__ . '/../controllers/TopicsController.php';
 require_once __DIR__ . '/../controllers/TopicContentController.php';
 require_once __DIR__ . '/../controllers/SubscriptionsController.php';
 require_once __DIR__ . '/../controllers/UserController.php';
+require_once __DIR__ . '/../controllers/UploadsController.php';
 
 // Parse route
 $parts = explode('/', rtrim($path, '/'));
@@ -109,6 +110,27 @@ try {
             respondError('Rota não encontrada', 404);
         }
     }
+    // Content Routes (alias de compatibilidade com frontend legado)
+    elseif ($resource === 'content') {
+        if ($method === 'GET' && !$id) {
+            if (isset($_GET['moduleId']) && !isset($_GET['topic_id'])) {
+                $_GET['topic_id'] = $_GET['moduleId'];
+            }
+            TopicContentController::getAll();
+        } elseif ($method === 'GET' && $id) {
+            TopicContentController::getById($id);
+        } elseif ($method === 'POST') {
+            TopicContentController::create();
+        } elseif ($method === 'PUT' && $id) {
+            TopicContentController::update($id);
+        } elseif ($method === 'DELETE' && $id === 'bulk') {
+            TopicContentController::bulkDelete();
+        } elseif ($method === 'DELETE' && $id) {
+            TopicContentController::delete($id);
+        } else {
+            respondError('Rota não encontrada', 404);
+        }
+    }
     // Subscriptions Routes
     elseif ($resource === 'subscriptions') {
         if ($method === 'GET' && !$id) {
@@ -133,6 +155,16 @@ try {
             respondSuccess([], 'Exam generation endpoint');
         } elseif ($path === 'ai/chat' && $method === 'POST') {
             respondSuccess([], 'Chat endpoint');
+        } else {
+            respondError('Rota não encontrada', 404);
+        }
+    }
+    // Uploads Routes
+    elseif ($resource === 'uploads') {
+        if ($method === 'POST' && !$id) {
+            UploadsController::upload();
+        } elseif ($method === 'GET' && $id) {
+            UploadsController::getFile($id);
         } else {
             respondError('Rota não encontrada', 404);
         }

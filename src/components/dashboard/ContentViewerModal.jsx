@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, FileText, Video, Mic, Download } from 'lucide-react';
-import { API_BASE } from '@/lib/api';
 
 const ContentViewerModal = ({ isOpen, onClose, content }) => {
   if (!content) return null;
@@ -14,7 +13,7 @@ const ContentViewerModal = ({ isOpen, onClose, content }) => {
     const token = localStorage.getItem('token');
     if (!token) return rawUrl;
 
-    const url = rawUrl.startsWith('/uploads/') ? `${API_BASE}${rawUrl}` : rawUrl;
+    const url = rawUrl;
     const separator = url.includes('?') ? '&' : '?';
     return `${url}${separator}token=${encodeURIComponent(token)}`;
   };

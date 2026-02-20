@@ -60,7 +60,7 @@ const AdminContentManagement = () => {
 
         try {
             const data = await api(`/content?moduleId=${selectedModule}`);
-            setContents(data || []);
+            setContents(data?.data || []);
         } catch (error) {
             toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
         }

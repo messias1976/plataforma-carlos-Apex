@@ -19,7 +19,8 @@ class TopicContentController {
             $params = [];
 
             if ($topicId) {
-                $sql .= ' AND data->"$.topic_id" = ?';
+                $sql .= ' AND (JSON_UNQUOTE(JSON_EXTRACT(data, "$.topic_id")) = ? OR JSON_UNQUOTE(JSON_EXTRACT(data, "$.module_id")) = ?)';
+                $params[] = $topicId;
                 $params[] = $topicId;
             }
 
@@ -29,7 +30,19 @@ class TopicContentController {
             $stmt->execute($params);
             $contents = $stmt->fetchAll();
 
-            respondSuccess($contents, 'Conteúdos retrieved successfully');
+            $normalized = array_map(function ($row) {
+                $data = [];
+                if (!empty($row['data'])) {
+                    $decoded = json_decode($row['data'], true);
+                    if (is_array($decoded)) {
+                        $data = $decoded;
+                    }
+                }
+
+                return array_merge($row, $data);
+            }, $contents);
+
+            respondSuccess($normalized, 'Conteúdos retrieved successfully');
         } catch (Exception $e) {
             respondError($e->getMessage(), 500);
         }
@@ -48,6 +61,13 @@ class TopicContentController {
 
             if (!$content) {
                 respondError('Conteúdo não encontrado', 404);
+            }
+
+            if (!empty($content['data'])) {
+                $decoded = json_decode($content['data'], true);
+                if (is_array($decoded)) {
+                    $content = array_merge($content, $decoded);
+                }
             }
 
             respondSuccess($content, 'Conteúdo retrieved successfully');
