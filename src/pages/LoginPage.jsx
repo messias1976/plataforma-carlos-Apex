@@ -40,8 +40,10 @@ export default function LoginPage() {
         description: "A redirecionar...",
       });
 
+      const isAdminUser = result.user?.role === 'admin' || result.user?.is_admin === true;
+
       // Redirecionar admin para dashboard administrativo
-      if (result.user?.is_admin) {
+      if (isAdminUser) {
         navigate('/admin');
       } else {
         navigate('/dashboard');

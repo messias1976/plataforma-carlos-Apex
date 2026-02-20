@@ -83,9 +83,11 @@ const TeacherInterface = ({ isOpen, onClose }) => {
                 })
             });
 
+            const reply = data?.reply || data?.data?.reply || data?.data?.message || data?.message || 'Sem resposta da IA.';
+
             setMessages(prev => [
                 ...prev,
-                { role: "assistant", content: data.reply }
+                { role: "assistant", content: reply }
             ]);
         } catch (err) {
             setMessages(prev => [

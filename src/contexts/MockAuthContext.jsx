@@ -18,35 +18,54 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const normalizeUser = (rawUser) => {
+    if (!rawUser || typeof rawUser !== 'object') return null;
+
+    const normalized = { ...rawUser };
+
+    if (!normalized.id && normalized.user_id) {
+      normalized.id = normalized.user_id;
+    }
+
+    if (!normalized.user_id && normalized.id) {
+      normalized.user_id = normalized.id;
+    }
+
+    const inferredIsAdmin = normalized.role === 'admin' || normalized.is_admin === true || normalized.is_admin === 1;
+    normalized.is_admin = inferredIsAdmin;
+    normalized.role = inferredIsAdmin ? 'admin' : (normalized.role || 'student');
+
+    return normalized;
+  };
+
   // --- FUNÇÃO API CENTRALIZADA (IMPLEMENTA A SUA LÓGICA) ---
   const api = async (endpoint, options = {}) => {
     const token = localStorage.getItem('token');
-    let finalEndpoint = endpoint;
-    let finalBody = options.body ? JSON.parse(options.body) : {};
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
 
     if (token) {
-      if (options.method === 'GET' || !options.method) {
-        const separator = finalEndpoint.includes('?') ? '&' : '?';
-        finalEndpoint += `${separator}token=${token}`;
-      } else {
-        finalBody.token = token;
-      }
+      headers.Authorization = `Bearer ${token}`;
     }
 
     const finalOptions = {
       ...options,
-      headers: { 'Content-Type': 'application/json', ...options.headers },
-      body: (options.method !== 'GET' && Object.keys(finalBody).length > 0)
-        ? JSON.stringify(finalBody)
-        : undefined,
+      headers,
     };
 
-    const response = await fetch(`${API_BASE}${finalEndpoint}`, finalOptions);
+    const response = await fetch(`${API_BASE}${endpoint}`, finalOptions);
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await response.json()
+      : { success: false, error: await response.text() };
+
     if (!response.ok) {
       throw new Error(data.error || 'Falha no pedido à API');
     }
+
     return data;
   };
 
@@ -54,16 +73,30 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('token');
+      const storedUserRaw = localStorage.getItem('user');
+      const storedUser = storedUserRaw ? normalizeUser(JSON.parse(storedUserRaw)) : null;
+
+      if (storedUser) {
+        setUser(storedUser);
+      }
+
       if (token) {
         try {
           const profileData = await api('/user/profile');
           if (profileData.success) {
-            setUser(profileData.data);
+            const mergedUser = normalizeUser({
+              ...(storedUser || {}),
+              ...(profileData.data || {}),
+            });
+            setUser(mergedUser);
+            localStorage.setItem('user', JSON.stringify(mergedUser));
           } else {
             logout();
           }
         } catch (error) {
-          logout();
+          if (!storedUser) {
+            logout();
+          }
         }
       }
       setLoading(false);
@@ -80,10 +113,11 @@ export const AuthProvider = ({ children }) => {
 
       // 🔥 CORREÇÃO REAL
       if (data.success && data.data?.token) {
+        const normalizedUser = normalizeUser(data.data.user);
         localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
-        setUser(data.data.user);
-        return { user: data.data.user, error: null };
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+        setUser(normalizedUser);
+        return { user: normalizedUser, error: null };
       } else {
         throw new Error(data.error || "Resposta de login inválida");
       }
@@ -91,7 +125,7 @@ export const AuthProvider = ({ children }) => {
       return { user: null, error: error.message };
     }
   };
-  
+
   const logout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
@@ -117,7 +151,8 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
-    isAdmin: user?.role === 'admin',
+    isAdmin: user?.role === 'admin' || user?.is_admin === true,
+    isAuthenticated: !!user,
     api,
   };
 

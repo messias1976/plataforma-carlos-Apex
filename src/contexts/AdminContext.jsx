@@ -23,7 +23,7 @@ export const AdminProvider = ({ children }) => {
   return (
     <AdminContext.Provider
       value={{
-        isAdmin: user?.is_admin,
+        isAdmin: user?.role === 'admin' || user?.is_admin === true,
         loading: false,
         adminLogin,
         adminLogout,

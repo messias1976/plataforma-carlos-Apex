@@ -38,10 +38,16 @@ const TheoreticalExamsInterface = ({ isOpen, onClose }) => {
                 })
             });
 
-            let examPayload = data;
+            let examPayload = data?.data || data;
             if (data && typeof data.reply === 'string') {
                 try {
                     examPayload = JSON.parse(data.reply);
+                } catch (err) {
+                    examPayload = null;
+                }
+            } else if (data?.data && typeof data.data.reply === 'string') {
+                try {
+                    examPayload = JSON.parse(data.data.reply);
                 } catch (err) {
                     examPayload = null;
                 }
