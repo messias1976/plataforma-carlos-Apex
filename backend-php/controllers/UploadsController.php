@@ -2,6 +2,20 @@
 
 if (!class_exists('UploadsController')) {
 class UploadsController {
+    private static function uploadErrorMessage($errorCode) {
+        $messages = [
+            UPLOAD_ERR_INI_SIZE => 'Arquivo excede upload_max_filesize do PHP.',
+            UPLOAD_ERR_FORM_SIZE => 'Arquivo excede o tamanho máximo permitido pelo formulário.',
+            UPLOAD_ERR_PARTIAL => 'Upload parcial do arquivo.',
+            UPLOAD_ERR_NO_FILE => 'Nenhum arquivo foi enviado.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Diretório temporário do PHP não encontrado.',
+            UPLOAD_ERR_CANT_WRITE => 'Falha ao escrever arquivo no disco.',
+            UPLOAD_ERR_EXTENSION => 'Upload interrompido por extensão do PHP.',
+        ];
+
+        return $messages[$errorCode] ?? ('Erro desconhecido de upload (código ' . $errorCode . ').');
+    }
+
     private static function uploadsDir() {
         return dirname(__DIR__) . '/uploads';
     }
@@ -38,12 +52,28 @@ class UploadsController {
             respondError('Método não permitido', 405);
         }
 
-        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-            respondError('Arquivo inválido para upload', 400);
+        if (!isset($_FILES['file'])) {
+            respondError('Arquivo inválido para upload: campo file ausente.', 400);
+        }
+
+        if (($_FILES['file']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $uploadErrorCode = (int) ($_FILES['file']['error'] ?? UPLOAD_ERR_NO_FILE);
+            respondError(self::uploadErrorMessage($uploadErrorCode), 400, [
+                'code' => $uploadErrorCode,
+            ]);
         }
 
         $dir = self::ensureUploadsDir();
+        if (!is_writable($dir)) {
+            respondError('Diretório de uploads sem permissão de escrita.', 500, [
+                'path' => $dir,
+            ]);
+        }
+
         $file = $_FILES['file'];
+        if (empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            respondError('Arquivo temporário inválido para upload.', 400);
+        }
 
         $originalName = $file['name'] ?? 'file';
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
@@ -53,7 +83,11 @@ class UploadsController {
         $target = $dir . '/' . $filename;
 
         if (!move_uploaded_file($file['tmp_name'], $target)) {
-            respondError('Falha ao mover arquivo no servidor', 500);
+            $lastError = error_get_last();
+            respondError('Falha ao mover arquivo no servidor', 500, [
+                'target' => $target,
+                'details' => $lastError['message'] ?? null,
+            ]);
         }
 
         respondSuccess([
