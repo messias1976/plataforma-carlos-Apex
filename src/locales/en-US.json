@@ -1,0 +1,305 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "back": "Back",
+    "close": "Close",
+    "error": "Error",
+    "success": "Success",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "start": "Start",
+    "continue": "Continue",
+    "completed": "Completed",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "confirm": "Confirm",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "view": "View",
+    "upgrade": "Upgrade Now",
+    "upgradeTitle": "Premium Feature",
+    "upgradeDesc": "This feature is available on paid plans only. Upgrade to unlock full potential!",
+    "restricted": "Restricted Access",
+    "backToDashboard": "Back to Dashboard",
+    "backToTrails": "Back to Trails",
+    "open": "Open",
+    "tryAgain": "Try Again",
+    "backToPlans": "View Plans",
+    "manage": "Manage",
+    "upload": "Upload File",
+    "select": "Select",
+    "search": "Search",
+    "filter": "Filter",
+    "active": "Active",
+    "inactive": "Inactive",
+    "created_at": "Created at",
+    "status": "Status"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "loggingIn": "Logging in...",
+    "welcomeBack": "Welcome Back!",
+    "createAccount": "Create your account"
+  },
+  "landing": {
+    "title": "Master Any Subject with AI",
+    "subtitle": "Intelligent learning platform with tutorials, exams and AI teacher",
+    "free": {
+        "title": "Free Plan",
+        "price": "Free",
+        "cta": "Get Started",
+        "features": ["Limited Study Zone Access", "10 Daily Questions", "Basic Student Profile"]
+    },
+    "standard": {
+        "title": "Standard Plan",
+        "price": "$29.90/month",
+        "cta": "Choose Plan",
+        "features": ["Access to all subjects", "Unlimited Theoretical Exams", "Completion Certificates", "Ad-free experience"]
+    },
+    "premium": {
+        "title": "Premium Plan",
+        "price": "$79.90/month",
+        "cta": "Choose Plan",
+        "features": ["Everything in Standard", "24/7 AI Mentor", "Educational Escape Room", "Advanced Performance Analytics", "Priority Support"]
+    }
+  },
+  "trails": {
+    "tutorial": "Interactive Tutorial",
+    "tutorialDesc": "Learn with our interactive tutorial system",
+    "exams": "Theoretical Exams",
+    "examsDesc": "Practice with complete and detailed exams",
+    "ai": "AI Teacher",
+    "aiDesc": "Learn with personalized artificial intelligence"
+  },
+  "dashboard": {
+    "searchPlaceholder": "What do you want to learn today?",
+    "tabs": {
+      "home": "Home",
+      "zone": "Study Zone",
+      "profile": "Profile",
+      "ranking": "Ranking",
+      "store": "Store",
+      "analytics": "Analytics",
+      "tournament": "1v1 Battle",
+      "escape": "Escape Room",
+      "swipe": "Swipe Learning",
+      "subscription": "Plans"
+    },
+    "header": {
+      "logout": "Logout",
+      "profile": "My Profile",
+      "aiAgent": "AI Mentor",
+      "student": "Student",
+      "adminDashboard": "Admin Dashboard",
+      "contentEditor": "Content Editor",
+      "language": "Language"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "tabs": {
+      "subjects": "Manage Subjects",
+      "content": "Content",
+      "users": "Users",
+      "trails": "Trails",
+      "resources": "Resources",
+      "settings": "Settings"
+    },
+    "users": {
+        "title": "User Management",
+        "totalUsers": "Total Users",
+        "activeSubs": "Active Subscriptions",
+        "planDistribution": "Plan Distribution",
+        "table": {
+            "id": "ID",
+            "email": "Email",
+            "plan": "Plan",
+            "status": "Status",
+            "created": "Created Date",
+            "actions": "Actions"
+        }
+    },
+    "subjects": {
+      "title": "Subjects Management",
+      "addSubject": "New Subject",
+      "editSubject": "Edit Subject",
+      "addTopic": "New Topic",
+      "editTopic": "Edit Topic",
+      "manageContent": "Edit Content",
+      "deleteSubject": "Subject deleted successfully",
+      "noSubjects": "No subjects registered in this area.",
+      "noTopics": "No topics registered.",
+      "topics": "Topics",
+      "confirmDeleteSubject": "Are you sure you want to delete this subject? All topics and content will be lost.",
+      "confirmDeleteTopic": "Are you sure you want to delete this topic?",
+      "form": {
+        "name": "Name",
+        "description": "Description",
+        "area": "Knowledge Area",
+        "order": "Display Order",
+        "save": "Save"
+      }
+    },
+    "content": {
+      "selectSubject": "Select Subject",
+      "topics": "Topics",
+      "newTopic": "New Topic",
+      "editTopic": "Edit Topic",
+      "deleteTopic": "Delete Topic",
+      "manageContent": "Manage Content",
+      "contentList": "Content List",
+      "noContent": "No content found.",
+      "addContent": "Add Content",
+      "editContent": "Edit Content",
+      "deleteContentTitle": "Delete Content",
+      "deleteContentDesc": "Are you sure you want to delete this content? This action cannot be undone.",
+      "form": {
+        "title": "Title",
+        "type": "Type",
+        "url": "URL / Media",
+        "description": "Description",
+        "body": "Content (Text)",
+        "order": "Order",
+        "save": "Save Content"
+      },
+      "types": {
+        "text": "Text",
+        "video": "Video",
+        "image": "Image",
+        "exercise": "Exercise",
+        "audio": "Audio",
+        "document": "Document"
+      },
+      "messages": {
+        "saved": "Content saved successfully!",
+        "deleted": "Content deleted!",
+        "error": "Error performing operation."
+      }
+    },
+    "resources": {
+        "totalSubjects": "Total Subjects",
+        "contentItems": "Content Items",
+        "distribution": "Distribution by Type",
+        "texts": "Texts",
+        "videos": "Videos",
+        "audios": "Audios",
+        "docs": "Docs"
+    }
+  },
+  "studyZone": {
+    "areas": {
+      "linguagens": "Languages and Technologies",
+      "matematica": "Mathematics and Technologies",
+      "natureza": "Natural Sciences",
+      "humanas": "Human Sciences"
+    },
+    "progress": "Your Progress",
+    "learning": "Continue Learning",
+    "backToZone": "Back",
+    "topics": "Study Topics",
+    "startStudying": "Start Studying",
+    "content": "Available Content",
+    "subjects": "Subjects"
+  },
+  "aiTeacher": {
+    "title": "AI Agent",
+    "inputPlaceholder": "Ask something...",
+    "personalities": {
+        "motivadora": "Motivator",
+        "brava": "Strict",
+        "calma": "Calm/Zen",
+        "sarcástica": "Sarcastic",
+        "einstein": "Einstein"
+    },
+    "responses": {
+        "motivadora": "You are doing great! Keep it up! About that...",
+        "brava": "Pay attention! We already explained this. The answer is...",
+        "calma": "Take a deep breath. Let's analyze this together calmly...",
+        "sarcástica": "Oh, sure, because that's obvious, isn't it? But let's go...",
+        "einstein": "Relatively speaking, the answer depends on the reference frame..."
+    },
+    "selectPersonality": "Select Personality",
+    "intro": "Hello! I am in mode",
+    "help": "How can I help?"
+  },
+  "escape": {
+    "title": "Escape Room",
+    "room": "Room",
+    "locked": "LOCKED",
+    "unlocked": "UNLOCKED",
+    "inputPlaceholder": "Enter code...",
+    "unlock": "Unlock",
+    "hint": "Need a hint?",
+    "hideHint": "Hide Hint",
+    "clue": "Clue",
+    "success": "Access Granted!",
+    "fail": "Incorrect Code",
+    "nextRoom": "Next Room",
+    "completed": "All rooms completed!",
+    "rooms": {
+        "0": {
+            "title": "The Historical Archives",
+            "desc": "You are trapped in an ancient library. A keypad blocks the exit. A note reads: 'I am the beginning of Eternity, the end of Time and Space, the beginning of every End, and the end of every Place. What am I?'",
+            "clue": "Look at the letter 'E'."
+        },
+        "1": {
+            "title": "The Quantum Lab",
+            "desc": "The door is sealed with a mathematical lock. Solve for x: 3(x - 2) = 15",
+            "clue": "Distribute the 3 first."
+        }
+    }
+  },
+  "profile": {
+    "rank": "Current Rank",
+    "xp": "XP Current Level",
+    "intelligence": "Intelligence",
+    "focus": "Focus",
+    "subscription": "Subscription",
+    "currentPlan": "Current Plan",
+    "expires": "Expires in",
+    "upgrade": "Upgrade Now",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "consist": "High Consistency",
+    "quick": "Fast Learning",
+    "late": "Task Delays",
+    "missions": "Daily Missions",
+    "done": "Done",
+    "claim": "Claim",
+    "missionCompleted": "Mission Completed!",
+    "mastery": "Subject Mastery"
+  },
+  "store": {
+    "title": "Item Store",
+    "subtitle": "Use your coins to customize your experience",
+    "coins": "Coins",
+    "skins": "MENTOR SKIN",
+    "buy": "Buy",
+    "equip": "Equip",
+    "equipped": "Equipped",
+    "success": "Item purchased!",
+    "insufficient": "Insufficient coins"
+  },
+  "ranking": {
+    "title": "Global Ranking",
+    "subtitle": "See who is leading the knowledge journey",
+    "student": "STUDENT",
+    "level": "LEVEL",
+    "accuracy": "ACCURACY"
+  },
+  "subscription": {
+    "free": { "name": "Free" },
+    "plan1": { "name": "Standard" },
+    "plan2": { "name": "Premium" }
+  }
+}

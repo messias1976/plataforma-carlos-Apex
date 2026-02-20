@@ -1,0 +1,305 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "back": "Voltar",
+    "close": "Fechar",
+    "error": "Erro",
+    "success": "Sucesso",
+    "locked": "Bloqueado",
+    "unlocked": "Desbloqueado",
+    "start": "Iniciar",
+    "continue": "Continuar",
+    "completed": "Concluído",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "confirm": "Confirmar",
+    "actions": "Ações",
+    "yes": "Sim",
+    "no": "Não",
+    "view": "Visualizar",
+    "upgrade": "Fazer Upgrade",
+    "upgradeTitle": "Recurso Premium",
+    "upgradeDesc": "Este recurso está disponível apenas nos planos pagos. Faça upgrade para desbloquear todo o potencial!",
+    "restricted": "Acesso Restrito",
+    "backToDashboard": "Voltar ao Início",
+    "backToTrails": "Voltar para Trilhas",
+    "open": "Abrir",
+    "tryAgain": "Tentar Novamente",
+    "backToPlans": "Ver Planos",
+    "manage": "Gerenciar",
+    "upload": "Enviar Arquivo",
+    "select": "Selecionar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "created_at": "Criado em",
+    "status": "Status"
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Cadastrar",
+    "email": "Email",
+    "password": "Senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "signIn": "Fazer Login",
+    "signUp": "Criar Conta",
+    "loggingIn": "Entrando...",
+    "welcomeBack": "Bem-vindo de volta!",
+    "createAccount": "Crie sua conta"
+  },
+  "landing": {
+    "title": "Domine Qualquer Assunto com IA",
+    "subtitle": "Plataforma de aprendizado inteligente com tutoriais, exames e professor IA",
+    "free": {
+        "title": "Plano Gratuito",
+        "price": "Grátis",
+        "cta": "Começar Agora",
+        "features": ["Acesso limitado à Zona de Estudo", "10 perguntas diárias", "Perfil de Estudante Básico"]
+    },
+    "standard": {
+        "title": "Plano Padrão",
+        "price": "R$ 29,90/mês",
+        "cta": "Escolher Plano",
+        "features": ["Acesso a todas as matérias", "Exames Teóricos Ilimitados", "Certificados de Conclusão", "Sem anúncios"]
+    },
+    "premium": {
+        "title": "Plano Premium",
+        "price": "R$ 79,90/mês",
+        "cta": "Escolher Plano",
+        "features": ["Tudo do Padrão", "Mentor IA 24/7", "Escape Room Educativo", "Análise de Desempenho Avançada", "Prioridade no Suporte"]
+    }
+  },
+  "trails": {
+    "tutorial": "Tutorial Interativo",
+    "tutorialDesc": "Aprenda com nosso sistema de tutoriais interativos",
+    "exams": "Exames Teóricos",
+    "examsDesc": "Pratique com exames completos e detalhados",
+    "ai": "Professor IA",
+    "aiDesc": "Aprenda com inteligência artificial personalizada"
+  },
+  "dashboard": {
+    "searchPlaceholder": "O que você quer aprender hoje?",
+    "tabs": {
+      "home": "Início",
+      "zone": "Zona de Estudo",
+      "profile": "Perfil",
+      "ranking": "Ranking",
+      "store": "Loja",
+      "analytics": "Desempenho",
+      "tournament": "Batalha 1v1",
+      "escape": "Escape Room",
+      "swipe": "Swipe Learning",
+      "subscription": "Planos"
+    },
+    "header": {
+      "logout": "Sair",
+      "profile": "Meu Perfil",
+      "aiAgent": "Mentor IA",
+      "student": "Estudante",
+      "adminDashboard": "Painel Admin",
+      "contentEditor": "Editor de Conteúdo",
+      "language": "Idioma"
+    }
+  },
+  "admin": {
+    "title": "Painel Administrativo",
+    "tabs": {
+      "subjects": "Gerenciar Matérias",
+      "content": "Conteúdo",
+      "users": "Usuários",
+      "trails": "Trilhas",
+      "resources": "Recursos",
+      "settings": "Configurações"
+    },
+    "users": {
+        "title": "Gerenciamento de Usuários",
+        "totalUsers": "Total de Usuários",
+        "activeSubs": "Assinaturas Ativas",
+        "planDistribution": "Distribuição de Planos",
+        "table": {
+            "id": "ID",
+            "email": "Email",
+            "plan": "Plano",
+            "status": "Status",
+            "created": "Data Criação",
+            "actions": "Ações"
+        }
+    },
+    "subjects": {
+      "title": "Gerenciamento de Matérias",
+      "addSubject": "Nova Matéria",
+      "editSubject": "Editar Matéria",
+      "addTopic": "Novo Tópico",
+      "editTopic": "Editar Tópico",
+      "manageContent": "Editar Conteúdo",
+      "deleteSubject": "Matéria excluída com sucesso",
+      "noSubjects": "Nenhuma matéria cadastrada nesta área.",
+      "noTopics": "Nenhum tópico cadastrado.",
+      "topics": "Tópicos",
+      "confirmDeleteSubject": "Tem certeza que deseja excluir esta matéria? Todos os tópicos e conteúdos serão perdidos.",
+      "confirmDeleteTopic": "Tem certeza que deseja excluir este tópico?",
+      "form": {
+        "name": "Nome",
+        "description": "Descrição",
+        "area": "Área de Conhecimento",
+        "order": "Ordem de Exibição",
+        "save": "Salvar"
+      }
+    },
+    "content": {
+      "selectSubject": "Selecione a Matéria",
+      "topics": "Tópicos",
+      "newTopic": "Novo Tópico",
+      "editTopic": "Editar Tópico",
+      "deleteTopic": "Excluir Tópico",
+      "manageContent": "Gerenciar Conteúdo",
+      "contentList": "Lista de Conteúdos",
+      "noContent": "Nenhum conteúdo encontrado.",
+      "addContent": "Adicionar Conteúdo",
+      "editContent": "Editar Conteúdo",
+      "deleteContentTitle": "Excluir Conteúdo",
+      "deleteContentDesc": "Você tem certeza que deseja excluir este conteúdo? Esta ação não pode ser desfeita.",
+      "form": {
+        "title": "Título",
+        "type": "Tipo",
+        "url": "URL / Mídia",
+        "description": "Descrição",
+        "body": "Conteúdo (Texto)",
+        "order": "Ordem",
+        "save": "Salvar Conteúdo"
+      },
+      "types": {
+        "text": "Texto",
+        "video": "Vídeo",
+        "image": "Imagem",
+        "exercise": "Exercício",
+        "audio": "Áudio",
+        "document": "Documento"
+      },
+      "messages": {
+        "saved": "Conteúdo salvo com sucesso!",
+        "deleted": "Conteúdo excluído!",
+        "error": "Erro ao realizar operação."
+      }
+    },
+    "resources": {
+        "totalSubjects": "Total Matérias",
+        "contentItems": "Itens de Conteúdo",
+        "distribution": "Distribuição por Tipo",
+        "texts": "Textos",
+        "videos": "Vídeos",
+        "audios": "Áudios",
+        "docs": "Docs"
+    }
+  },
+  "studyZone": {
+    "areas": {
+      "linguagens": "Linguagens e suas Tecnologias",
+      "matematica": "Matemática e suas Tecnologias",
+      "natureza": "Ciências da Natureza",
+      "humanas": "Ciências Humanas"
+    },
+    "progress": "Seu Progresso",
+    "learning": "Continuar Estudando",
+    "backToZone": "Voltar",
+    "topics": "Tópicos de Estudo",
+    "startStudying": "Começar a Estudar",
+    "content": "Conteúdo Disponível",
+    "subjects": "Matérias"
+  },
+  "aiTeacher": {
+    "title": "Agente AI",
+    "inputPlaceholder": "Pergunte algo...",
+    "personalities": {
+        "motivadora": "Motivadora",
+        "brava": "Brava/Rígida",
+        "calma": "Calma/Zen",
+        "sarcástica": "Sarcástica",
+        "einstein": "Einstein"
+    },
+    "responses": {
+        "motivadora": "Você está indo super bem! Continue assim! Sobre isso...",
+        "brava": "Preste atenção! Já explicamos isso antes. A resposta é...",
+        "calma": "Respire fundo. Vamos analisar isso juntos com tranquilidade...",
+        "sarcástica": "Ah, claro, porque isso é óbvio, não? Mas vamos lá...",
+        "einstein": "Relativamente falando, a resposta depende do referencial..."
+    },
+    "selectPersonality": "Selecione Personalidade",
+    "intro": "Olá! Estou no modo",
+    "help": "Como posso ajudar?"
+  },
+  "escape": {
+    "title": "Escape Room",
+    "room": "Sala",
+    "locked": "BLOQUEADO",
+    "unlocked": "DESBLOQUEADO",
+    "inputPlaceholder": "Digite o código...",
+    "unlock": "Desbloquear",
+    "hint": "Precisa de uma dica?",
+    "hideHint": "Esconder Dica",
+    "clue": "Dica",
+    "success": "Acesso Concedido!",
+    "fail": "Código Incorreto",
+    "nextRoom": "Próxima Sala",
+    "completed": "Todas as salas completadas!",
+    "rooms": {
+        "0": {
+            "title": "Os Arquivos Históricos",
+            "desc": "Você está preso em uma biblioteca antiga. Um teclado bloqueia a saída. Uma nota diz: 'Eu sou o começo da Eternidade, o fim do Tempo e do Espaço, o começo de todo Fim, e o fim de todo Lugar. O que sou eu?'",
+            "clue": "Olhe para a letra 'E'."
+        },
+        "1": {
+            "title": "O Laboratório Quântico",
+            "desc": "A porta está selada com uma trava matemática. Resolva para x: 3(x - 2) = 15",
+            "clue": "Distribua o 3 primeiro."
+        }
+    }
+  },
+  "profile": {
+    "rank": "Rank Atual",
+    "xp": "XP Nível Atual",
+    "intelligence": "Inteligência",
+    "focus": "Foco",
+    "subscription": "Assinatura",
+    "currentPlan": "Plano Atual",
+    "expires": "Expira em",
+    "upgrade": "Fazer Upgrade",
+    "strengths": "Pontos Fortes",
+    "weaknesses": "Pontos a Melhorar",
+    "consist": "Consistência Alta",
+    "quick": "Aprendizado Rápido",
+    "late": "Atrasos em tarefas",
+    "missions": "Missões Diárias",
+    "done": "Concluído",
+    "claim": "Resgatar",
+    "missionCompleted": "Missão Completada!",
+    "mastery": "Domínio das Matérias"
+  },
+  "store": {
+    "title": "Loja de Itens",
+    "subtitle": "Use suas moedas para personalizar sua experiência",
+    "coins": "Moedas",
+    "skins": "SKIN DE MENTOR",
+    "buy": "Comprar",
+    "equip": "Equipar",
+    "equipped": "Equipado",
+    "success": "Item comprado!",
+    "insufficient": "Moedas insuficientes"
+  },
+  "ranking": {
+    "title": "Ranking Global",
+    "subtitle": "Veja quem está liderando a jornada do conhecimento",
+    "student": "ESTUDANTE",
+    "level": "NÍVEL",
+    "accuracy": "PRECISÃO"
+  },
+  "subscription": {
+    "free": { "name": "Gratuito" },
+    "plan1": { "name": "Padrão" },
+    "plan2": { "name": "Premium" }
+  }
+}
