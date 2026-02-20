@@ -14,6 +14,16 @@ class User {
         return (bool) $stmt->fetchColumn();
     }
 
+    private function columnExists($tableName, $columnName) {
+        if (!$this->tableExists($tableName)) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare("SHOW COLUMNS FROM `{$tableName}` LIKE ?");
+        $stmt->execute([$columnName]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     private function generateUuid() {
         $stmt = $this->db->query('SELECT UUID() as id');
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -104,7 +114,13 @@ class User {
 
         $profileData = [];
         if ($this->tableExists('user_profiles')) {
-            $profileStmt = $this->db->prepare('SELECT full_name, avatar_url, xp, coins, level, phone, birthdate, language_preference FROM user_profiles WHERE user_id = ?');
+            $profileFields = ['full_name', 'avatar_url', 'xp', 'coins', 'level', 'phone', 'birthdate'];
+            if ($this->columnExists('user_profiles', 'language_preference')) {
+                $profileFields[] = 'language_preference';
+            }
+
+            $profileSql = 'SELECT ' . implode(', ', $profileFields) . ' FROM user_profiles WHERE user_id = ?';
+            $profileStmt = $this->db->prepare($profileSql);
             $profileStmt->execute([$user['id']]);
             $profileData = $profileStmt->fetch(PDO::FETCH_ASSOC) ?: [];
         }
@@ -117,25 +133,38 @@ class User {
     }
 
     public function getById($userId) {
-        $sql = '
+        $profileSelect = [];
+
+        if ($this->tableExists('user_profiles')) {
+            $optionalColumns = ['full_name', 'avatar_url', 'phone', 'birthdate', 'xp', 'coins', 'level'];
+            foreach ($optionalColumns as $column) {
+                if ($this->columnExists('user_profiles', $column)) {
+                    $profileSelect[] = 'up.' . $column;
+                }
+            }
+
+            if ($this->columnExists('user_profiles', 'language_preference')) {
+                $profileSelect[] = 'up.language_preference';
+            }
+        }
+
+        $baseSelect = [
+            'u.id as user_id',
+            'u.email',
+            'u.role',
+            'u.created_at'
+        ];
+
+        $selectFields = implode(",\n                ", array_merge($baseSelect, $profileSelect));
+
+        $sql = "
             SELECT
-                u.id as user_id,
-                u.email,
-                u.role,
-                u.created_at,
-                up.full_name,
-                up.avatar_url,
-                up.phone,
-                up.birthdate,
-                up.language_preference,
-                up.xp,
-                up.coins,
-                up.level
+                {$selectFields}
             FROM users u
             LEFT JOIN user_profiles up ON up.user_id = u.id
             WHERE u.id = ?
             LIMIT 1
-        ';
+        ";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
@@ -154,7 +183,10 @@ class User {
             return false;
         }
 
-        $allowedFields = ['full_name', 'phone', 'birthdate', 'avatar_url', 'xp', 'coins', 'level', 'language_preference'];
+        $allowedFields = ['full_name', 'phone', 'birthdate', 'avatar_url', 'xp', 'coins', 'level'];
+        if ($this->columnExists('user_profiles', 'language_preference')) {
+            $allowedFields[] = 'language_preference';
+        }
         $fields = [];
         $params = [];
 

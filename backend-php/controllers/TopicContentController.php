@@ -6,19 +6,25 @@ class TopicContentController {
         return Database::getConnection();
     }
 
+    private static function hasColumn($table, $column) {
+        $db = self::getDb();
+        $stmt = $db->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
+        $stmt->execute([$column]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public static function getAll() {
         try {
             $topicId = getQueryParam('topic_id');
             $db = self::getDb();
+            $hasDataColumn = self::hasColumn('contents', 'data');
 
-            $sql = '
-                SELECT id, title, description, data 
-                FROM contents 
-                WHERE type = "lesson" OR type = "content"
-            ';
+            $sql = $hasDataColumn
+                ? 'SELECT id, title, description, data FROM contents WHERE type = "lesson" OR type = "content"'
+                : 'SELECT id, title, description FROM contents WHERE type = "lesson" OR type = "content"';
             $params = [];
 
-            if ($topicId) {
+            if ($topicId && $hasDataColumn) {
                 $sql .= ' AND (JSON_UNQUOTE(JSON_EXTRACT(data, "$.topic_id")) = ? OR JSON_UNQUOTE(JSON_EXTRACT(data, "$.module_id")) = ?)';
                 $params[] = $topicId;
                 $params[] = $topicId;
@@ -51,11 +57,12 @@ class TopicContentController {
     public static function getById($id) {
         try {
             $db = self::getDb();
-            $stmt = $db->prepare('
-                SELECT id, title, description, data 
-                FROM contents 
-                WHERE id = ? AND (type = "lesson" OR type = "content")
-            ');
+            $hasDataColumn = self::hasColumn('contents', 'data');
+            $sql = $hasDataColumn
+                ? 'SELECT id, title, description, data FROM contents WHERE id = ? AND (type = "lesson" OR type = "content")'
+                : 'SELECT id, title, description FROM contents WHERE id = ? AND (type = "lesson" OR type = "content")';
+
+            $stmt = $db->prepare($sql);
             $stmt->execute([$id]);
             $content = $stmt->fetch();
 
@@ -89,13 +96,22 @@ class TopicContentController {
             }
 
             $db = self::getDb();
-            $stmt = $db->prepare('
-                INSERT INTO contents (title, type, description, data, created_at)
-                VALUES (?, "content", ?, ?, NOW())
-            ');
+            $hasDataColumn = self::hasColumn('contents', 'data');
 
-            $contentData = json_encode(array_diff_key($data, array_flip(['title', 'description'])));
-            $stmt->execute([$title, $description, $contentData]);
+            if ($hasDataColumn) {
+                $stmt = $db->prepare('
+                    INSERT INTO contents (title, type, description, data, created_at)
+                    VALUES (?, "content", ?, ?, NOW())
+                ');
+                $contentData = json_encode(array_diff_key($data, array_flip(['title', 'description'])));
+                $stmt->execute([$title, $description, $contentData]);
+            } else {
+                $stmt = $db->prepare('
+                    INSERT INTO contents (title, type, description, created_at)
+                    VALUES (?, "content", ?, NOW())
+                ');
+                $stmt->execute([$title, $description]);
+            }
 
             $id = $db->lastInsertId();
             respondSuccess(['id' => $id], 'Conteúdo criado com sucesso', 201);
@@ -117,15 +133,24 @@ class TopicContentController {
             }
 
             $db = self::getDb();
-            $contentData = json_encode(array_diff_key($data, array_flip(['title', 'description'])));
-            
-            $stmt = $db->prepare('
-                UPDATE contents 
-                SET title = ?, description = ?, data = ?
-                WHERE id = ? AND (type = "lesson" OR type = "content")
-            ');
+            $hasDataColumn = self::hasColumn('contents', 'data');
 
-            $stmt->execute([$title, $description, $contentData, $id]);
+            if ($hasDataColumn) {
+                $contentData = json_encode(array_diff_key($data, array_flip(['title', 'description'])));
+                $stmt = $db->prepare('
+                    UPDATE contents 
+                    SET title = ?, description = ?, data = ?
+                    WHERE id = ? AND (type = "lesson" OR type = "content")
+                ');
+                $stmt->execute([$title, $description, $contentData, $id]);
+            } else {
+                $stmt = $db->prepare('
+                    UPDATE contents 
+                    SET title = ?, description = ?
+                    WHERE id = ? AND (type = "lesson" OR type = "content")
+                ');
+                $stmt->execute([$title, $description, $id]);
+            }
 
             if ($stmt->rowCount() === 0) {
                 respondError('Conteúdo não encontrado', 404);
