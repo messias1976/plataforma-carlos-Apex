@@ -12,6 +12,7 @@ import AdminContentEditor from '@/pages/AdminContentEditor';
 import TheoreticalExamsPage from '@/pages/TheoreticalExamsPage';
 import PlanSelectionPage from '@/pages/PlanSelectionPage';
 import TutorialPage from '@/pages/TutorialPage';
+import StudyZoneContentPage from '@/pages/StudyZoneContentPage';
 import SubjectContentPage from '@/pages/SubjectContentPage';
 import TopicContentViewer from '@/components/dashboard/TopicContentViewer';
 import StripePaymentSuccess from '@/pages/StripePaymentSuccess';
@@ -82,6 +83,12 @@ function App() {
                                             } />
 
                                             <Route path="/study-zone" element={
+                                                <ProtectedRoute>
+                                                    <StudyZoneContentPage />
+                                                </ProtectedRoute>
+                                            } />
+
+                                            <Route path="/study-zone/:subjectId" element={
                                                 <ProtectedRoute>
                                                     <SubjectContentPage />
                                                 </ProtectedRoute>

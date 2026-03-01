@@ -13,6 +13,13 @@ class SubjectsController {
         return (bool) $stmt->fetchColumn();
     }
 
+    private static function tableExists($table) {
+        $db = self::getDb();
+        $stmt = $db->prepare('SHOW TABLES LIKE ?');
+        $stmt->execute([$table]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public static function getAll() {
         try {
             $db = self::getDb();
@@ -37,6 +44,19 @@ class SubjectsController {
                 return array_merge($row, $data);
             }, $subjects);
 
+            if (empty($normalized) && self::tableExists('subjects')) {
+                $legacyStmt = $db->query('SELECT id, name, description FROM subjects ORDER BY id');
+                $legacySubjects = $legacyStmt->fetchAll();
+
+                $normalized = array_map(function ($row) {
+                    return [
+                        'id' => $row['id'],
+                        'name' => $row['name'],
+                        'description' => $row['description'] ?? null,
+                    ];
+                }, $legacySubjects);
+            }
+
             respondSuccess($normalized, 'Assuntos retrieved successfully');
         } catch (Exception $e) {
             respondError($e->getMessage(), 500);
@@ -54,6 +74,20 @@ class SubjectsController {
             $stmt = $db->prepare($sql);
             $stmt->execute([$id]);
             $subject = $stmt->fetch();
+
+            if (!$subject && self::tableExists('subjects')) {
+                $legacyStmt = $db->prepare('SELECT id, name, description FROM subjects WHERE id = ? LIMIT 1');
+                $legacyStmt->execute([$id]);
+                $legacySubject = $legacyStmt->fetch();
+
+                if ($legacySubject) {
+                    $subject = [
+                        'id' => $legacySubject['id'],
+                        'name' => $legacySubject['name'],
+                        'description' => $legacySubject['description'] ?? null,
+                    ];
+                }
+            }
 
             if (!$subject) {
                 respondError('Assunto não encontrado', 404);

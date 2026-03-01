@@ -13,6 +13,13 @@ class TopicsController {
         return (bool) $stmt->fetchColumn();
     }
 
+    private static function tableExists($table) {
+        $db = self::getDb();
+        $stmt = $db->prepare('SHOW TABLES LIKE ?');
+        $stmt->execute([$table]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public static function getAll() {
         try {
             $subjectId = getQueryParam('subject_id');
@@ -53,6 +60,30 @@ class TopicsController {
                 return array_merge($row, $data);
             }, $topics);
 
+            if (empty($normalized) && self::tableExists('topics')) {
+                $legacySql = 'SELECT id, title as name, description, subject_id FROM topics';
+                $legacyParams = [];
+                if ($subjectId) {
+                    $legacySql .= ' WHERE subject_id = ?';
+                    $legacyParams[] = $subjectId;
+                }
+                $legacySql .= ' ORDER BY id';
+
+                $legacyStmt = $db->prepare($legacySql);
+                $legacyStmt->execute($legacyParams);
+                $legacyTopics = $legacyStmt->fetchAll();
+
+                $normalized = array_map(function ($row) {
+                    return [
+                        'id' => $row['id'],
+                        'name' => $row['name'],
+                        'title' => $row['name'],
+                        'description' => $row['description'] ?? null,
+                        'subject_id' => $row['subject_id'] ?? null,
+                    ];
+                }, $legacyTopics);
+            }
+
             respondSuccess($normalized, 'Tópicos retrieved successfully');
         } catch (Exception $e) {
             respondError($e->getMessage(), 500);
@@ -70,6 +101,22 @@ class TopicsController {
             $stmt = $db->prepare($sql);
             $stmt->execute([$id]);
             $topic = $stmt->fetch();
+
+            if (!$topic && self::tableExists('topics')) {
+                $legacyStmt = $db->prepare('SELECT id, title as name, description, subject_id FROM topics WHERE id = ? LIMIT 1');
+                $legacyStmt->execute([$id]);
+                $legacyTopic = $legacyStmt->fetch();
+
+                if ($legacyTopic) {
+                    $topic = [
+                        'id' => $legacyTopic['id'],
+                        'name' => $legacyTopic['name'],
+                        'title' => $legacyTopic['name'],
+                        'description' => $legacyTopic['description'] ?? null,
+                        'subject_id' => $legacyTopic['subject_id'] ?? null,
+                    ];
+                }
+            }
 
             if (!$topic) {
                 respondError('Tópico não encontrado', 404);
