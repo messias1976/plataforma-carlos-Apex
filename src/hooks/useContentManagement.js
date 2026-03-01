@@ -74,12 +74,13 @@ export const useContentManagement = () => {
       };
 
       const uploadUrls = [];
+      const isAbsoluteApiBase = /^https?:\/\//i.test(API_BASE);
 
-      if (typeof window !== 'undefined') {
+      if (isAbsoluteApiBase) {
+        uploadUrls.push(`${API_BASE}/api/uploads`);
+      } else {
         uploadUrls.push('/api/uploads');
       }
-
-      uploadUrls.push(`${API_BASE}/uploads`);
 
       let lastError = null;
       let response = null;
