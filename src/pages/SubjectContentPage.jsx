@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useContentManagement } from '@/hooks/useContentManagement';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,49 +22,30 @@ const SubjectContentPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  const normalizeContentType = (item) => item?.type || item?.content_type || 'text';
-
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
         // Fetch Subject Info
-        const subResponse = await api.subjects.getById(subjectId);
-        const subjectData = subResponse?.data || subResponse || null;
-        setSubject(subjectData);
+        const subData = await api.subjects.getById(subjectId);
+        setSubject(subData);
 
         // Fetch Topics
-        const topicResponse = await api.topics.getAll(subjectId);
-        const topicData = Array.isArray(topicResponse?.data)
-          ? topicResponse.data
-          : (Array.isArray(topicResponse) ? topicResponse : []);
-
-        setTopics(topicData);
+        const topicData = await api.topics.getAll(subjectId);
+        setTopics(topicData || []);
 
         if (topicData?.length > 0) {
           // Fetch All Content for these topics
           const allContent = [];
           for (const topic of topicData) {
-            const contentResponse = await api.topicContent.getAll(topic.id);
-            const contentData = Array.isArray(contentResponse?.data)
-              ? contentResponse.data
-              : (Array.isArray(contentResponse) ? contentResponse : []);
-
-            const topicName = topic?.name || topic?.title || `Tópico ${topic.id}`;
-            const withTopicName = contentData.map(c => ({
-              ...c,
-              type: normalizeContentType(c),
-              topic: { name: topicName }
-            }));
+            const contentData = await api.topicContent.getAll(topic.id);
+            const withTopicName = contentData.map(c => ({ ...c, topic: { name: topic.title } }));
             allContent.push(...withTopicName);
           }
           setContentItems(allContent);
-        } else {
-          setContentItems([]);
         }
       } catch (err) {
         console.error("Error loading subject data:", err);
-        setContentItems([]);
       } finally {
         setLoading(false);
       }
@@ -104,7 +86,7 @@ const SubjectContentPage = () => {
       {/* Header */}
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center gap-4 text-sm text-slate-400 mb-4">
-          <span className="cursor-pointer hover:text-white" onClick={() => navigate('/study-zone')}>Zona de Estudo</span>
+          <span className="cursor-pointer hover:text-white" onClick={() => navigate('/dashboard')}>Zona de Estudo</span>
           <span>&gt;</span>
           <span className="text-neon-400">{subject?.name}</span>
         </div>
@@ -114,7 +96,7 @@ const SubjectContentPage = () => {
             <BookOpen className="w-8 h-8 text-neon-500" />
             {subject?.name || t('common.loading')}
           </h1>
-          <Button variant="outline" onClick={() => navigate('/study-zone')} className="border-slate-700 text-slate-300">
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="border-slate-700 text-slate-300">
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t('common.back')}
           </Button>
