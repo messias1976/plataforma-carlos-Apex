@@ -6,6 +6,17 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 
+function requireFirstExisting(array $paths) {
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            require_once $path;
+            return;
+        }
+    }
+
+    throw new RuntimeException('Arquivo obrigatório não encontrado. Tentativas: ' . implode(', ', $paths));
+}
+
 set_error_handler(function ($severity, $message, $file, $line) {
     if (!(error_reporting() & $severity)) {
         return false;
@@ -14,8 +25,31 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 // Load environment variables
-if (file_exists(__DIR__ . '/.env')) {
-    $env = parse_ini_file(__DIR__ . '/.env');
+$envPath = null;
+$envCandidates = [
+    __DIR__ . '/.env',
+    __DIR__ . '/../.env',
+];
+
+foreach ($envCandidates as $candidate) {
+    if (file_exists($candidate)) {
+        $envPath = $candidate;
+        break;
+    }
+}
+
+if ($envPath !== null) {
+    $env = parse_ini_file($envPath);
+    if ($env === false) {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Não foi possível ler o arquivo .env em: ' . $envPath
+        ]);
+        exit;
+    }
+
     foreach ($env as $key => $value) {
         $_ENV[$key] = $value;
     }
@@ -24,7 +58,7 @@ if (file_exists(__DIR__ . '/.env')) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'success' => false,
-        'error' => 'Arquivo .env não encontrado em: ' . __DIR__ . '/.env'
+        'error' => 'Arquivo .env não encontrado. Tentativas: ' . implode(', ', $envCandidates)
     ]);
     exit;
 }
@@ -57,10 +91,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 try {
-    require_once __DIR__ . '/helpers/response.php';
-    require_once __DIR__ . '/helpers/jwt.php';
-    require_once __DIR__ . '/config/database.php';
-    require_once __DIR__ . '/routes/api.php';
+    requireFirstExisting([
+        __DIR__ . '/helpers/response.php',
+        __DIR__ . '/../helpers/response.php',
+    ]);
+    requireFirstExisting([
+        __DIR__ . '/helpers/jwt.php',
+        __DIR__ . '/../helpers/jwt.php',
+    ]);
+    requireFirstExisting([
+        __DIR__ . '/config/database.php',
+        __DIR__ . '/../config/database.php',
+    ]);
+    requireFirstExisting([
+        __DIR__ . '/routes/api.php',
+        __DIR__ . '/../routes/api.php',
+    ]);
 } catch (Throwable $e) {
     header('Content-Type: application/json; charset=utf-8');
     http_response_code(500);

@@ -2,9 +2,7 @@
 
 const rawApiBaseUrl = import.meta.env.VITE_API_URL || '';
 const normalizedApiBaseUrl = rawApiBaseUrl.replace(/\/+$/, '');
-const isBrowser = typeof window !== 'undefined';
-const shouldUseSameOriginApi = isBrowser && /(^|\.)apexestudos\.com$/i.test(window.location.hostname);
-export const API_BASE = shouldUseSameOriginApi ? '/api' : (normalizedApiBaseUrl || '/api');
+export const API_BASE = normalizedApiBaseUrl || '/api';
 
 // Helper para fazer requisições
 async function apiRequest(endpoint, options = {}) {
