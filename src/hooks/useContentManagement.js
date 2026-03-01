@@ -56,8 +56,8 @@ export const useContentManagement = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const uploadRequest = async (baseUrl) => {
-        const response = await fetch(`${baseUrl}/uploads`, {
+      const uploadRequest = async (url) => {
+        const response = await fetch(url, {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           body: formData,
@@ -73,7 +73,42 @@ export const useContentManagement = () => {
         return { response, payload };
       };
 
-      const { response, payload } = await uploadRequest(API_BASE);
+      const uploadUrls = [];
+
+      if (typeof window !== 'undefined') {
+        uploadUrls.push('/api/uploads');
+      }
+
+      uploadUrls.push(`${API_BASE}/uploads`);
+
+      let lastError = null;
+      let response = null;
+      let payload = null;
+
+      for (const url of uploadUrls) {
+        try {
+          const result = await uploadRequest(url);
+          response = result.response;
+          payload = result.payload;
+
+          if (response.ok) {
+            break;
+          }
+
+          if (response.status >= 500) {
+            lastError = new Error(payload?.error || payload?.message || `Falha no upload (HTTP ${response.status}).`);
+            continue;
+          }
+
+          break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (!response && lastError) {
+        throw lastError;
+      }
 
       if (!response.ok) {
         const backendMessage = payload?.error || payload?.message || payload?.errors?.details || null;

@@ -6,21 +6,33 @@ class TopicsController {
         return Database::getConnection();
     }
 
+    private static function hasColumn($table, $column) {
+        $db = self::getDb();
+        $stmt = $db->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
+        $stmt->execute([$column]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public static function getAll() {
         try {
             $subjectId = getQueryParam('subject_id');
             $db = self::getDb();
+            $hasDataColumn = self::hasColumn('contents', 'data');
+            $hasSubjectIdColumn = self::hasColumn('contents', 'subject_id');
 
-            $sql = '
-                SELECT id, title as name, description, data 
-                FROM contents 
-                WHERE type = "topic"
-            ';
+            $sql = $hasDataColumn
+                ? 'SELECT id, title as name, description, data FROM contents WHERE type = "topic"'
+                : 'SELECT id, title as name, description FROM contents WHERE type = "topic"';
             $params = [];
 
             if ($subjectId) {
-                $sql .= ' AND data->"$.subject_id" = ?';
-                $params[] = $subjectId;
+                if ($hasDataColumn) {
+                    $sql .= ' AND JSON_UNQUOTE(JSON_EXTRACT(data, "$.subject_id")) = ?';
+                    $params[] = (string) $subjectId;
+                } elseif ($hasSubjectIdColumn) {
+                    $sql .= ' AND subject_id = ?';
+                    $params[] = $subjectId;
+                }
             }
 
             $sql .= ' ORDER BY id';
@@ -29,7 +41,19 @@ class TopicsController {
             $stmt->execute($params);
             $topics = $stmt->fetchAll();
 
-            respondSuccess($topics, 'Tópicos retrieved successfully');
+            $normalized = array_map(function ($row) {
+                $data = [];
+                if (!empty($row['data'])) {
+                    $decoded = json_decode($row['data'], true);
+                    if (is_array($decoded)) {
+                        $data = $decoded;
+                    }
+                }
+
+                return array_merge($row, $data);
+            }, $topics);
+
+            respondSuccess($normalized, 'Tópicos retrieved successfully');
         } catch (Exception $e) {
             respondError($e->getMessage(), 500);
         }
@@ -38,16 +62,24 @@ class TopicsController {
     public static function getById($id) {
         try {
             $db = self::getDb();
-            $stmt = $db->prepare('
-                SELECT id, title as name, description, data 
-                FROM contents 
-                WHERE id = ? AND type = "topic"
-            ');
+            $hasDataColumn = self::hasColumn('contents', 'data');
+            $sql = $hasDataColumn
+                ? 'SELECT id, title as name, description, data FROM contents WHERE id = ? AND type = "topic"'
+                : 'SELECT id, title as name, description FROM contents WHERE id = ? AND type = "topic"';
+
+            $stmt = $db->prepare($sql);
             $stmt->execute([$id]);
             $topic = $stmt->fetch();
 
             if (!$topic) {
                 respondError('Tópico não encontrado', 404);
+            }
+
+            if (!empty($topic['data'])) {
+                $decoded = json_decode($topic['data'], true);
+                if (is_array($decoded)) {
+                    $topic = array_merge($topic, $decoded);
+                }
             }
 
             respondSuccess($topic, 'Tópico retrieved successfully');
@@ -60,16 +92,28 @@ class TopicsController {
         try {
             $subjectId = getQueryParam('subject_id');
             $db = self::getDb();
+            $hasDataColumn = self::hasColumn('contents', 'data');
+            $hasSubjectIdColumn = self::hasColumn('contents', 'subject_id');
 
             if (!$subjectId) {
                 // Count all topics
                 $stmt = $db->query('SELECT COUNT(*) as count FROM contents WHERE type = "topic"');
             } else {
-                $stmt = $db->prepare('
-                    SELECT COUNT(*) as count FROM contents 
-                    WHERE type = "topic" AND data->"$.subject_id" = ?
-                ');
-                $stmt->execute([$subjectId]);
+                if ($hasDataColumn) {
+                    $stmt = $db->prepare('
+                        SELECT COUNT(*) as count FROM contents 
+                        WHERE type = "topic" AND JSON_UNQUOTE(JSON_EXTRACT(data, "$.subject_id")) = ?
+                    ');
+                    $stmt->execute([(string) $subjectId]);
+                } elseif ($hasSubjectIdColumn) {
+                    $stmt = $db->prepare('
+                        SELECT COUNT(*) as count FROM contents 
+                        WHERE type = "topic" AND subject_id = ?
+                    ');
+                    $stmt->execute([$subjectId]);
+                } else {
+                    $stmt = $db->query('SELECT 0 as count');
+                }
             }
 
             $result = $stmt->fetch();
@@ -92,13 +136,23 @@ class TopicsController {
             }
 
             $db = self::getDb();
-            $stmt = $db->prepare('
-                INSERT INTO contents (title, type, description, data, created_at)
-                VALUES (?, "topic", ?, ?, NOW())
-            ');
+            $hasDataColumn = self::hasColumn('contents', 'data');
 
-            $contentData = json_encode(array_diff_key($data, array_flip(['name', 'title', 'description'])));
-            $stmt->execute([$title, $description, $contentData]);
+            if ($hasDataColumn) {
+                $stmt = $db->prepare('
+                    INSERT INTO contents (title, type, description, data, created_at)
+                    VALUES (?, "topic", ?, ?, NOW())
+                ');
+
+                $contentData = json_encode(array_diff_key($data, array_flip(['name', 'title', 'description'])));
+                $stmt->execute([$title, $description, $contentData]);
+            } else {
+                $stmt = $db->prepare('
+                    INSERT INTO contents (title, type, description, created_at)
+                    VALUES (?, "topic", ?, NOW())
+                ');
+                $stmt->execute([$title, $description]);
+            }
 
             $id = $db->lastInsertId();
             respondSuccess(['id' => $id], 'Tópico criado com sucesso', 201);
@@ -120,15 +174,27 @@ class TopicsController {
             }
 
             $db = self::getDb();
-            $contentData = json_encode(array_diff_key($data, array_flip(['name', 'title', 'description'])));
-            
-            $stmt = $db->prepare('
-                UPDATE contents 
-                SET title = ?, description = ?, data = ?
-                WHERE id = ? AND type = "topic"
-            ');
+            $hasDataColumn = self::hasColumn('contents', 'data');
 
-            $stmt->execute([$title, $description, $contentData, $id]);
+            if ($hasDataColumn) {
+                $contentData = json_encode(array_diff_key($data, array_flip(['name', 'title', 'description'])));
+
+                $stmt = $db->prepare('
+                    UPDATE contents 
+                    SET title = ?, description = ?, data = ?
+                    WHERE id = ? AND type = "topic"
+                ');
+
+                $stmt->execute([$title, $description, $contentData, $id]);
+            } else {
+                $stmt = $db->prepare('
+                    UPDATE contents 
+                    SET title = ?, description = ?
+                    WHERE id = ? AND type = "topic"
+                ');
+
+                $stmt->execute([$title, $description, $id]);
+            }
 
             if ($stmt->rowCount() === 0) {
                 respondError('Tópico não encontrado', 404);
