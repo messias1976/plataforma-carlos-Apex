@@ -27,6 +27,7 @@ require_once __DIR__ . '/../controllers/TopicsController.php';
 require_once __DIR__ . '/../controllers/TopicContentController.php';
 require_once __DIR__ . '/../controllers/SubscriptionsController.php';
 require_once __DIR__ . '/../controllers/UserController.php';
+require_once __DIR__ . '/../controllers/AIController.php';
 
 // Parse route
 $parts = explode('/', rtrim($path, '/'));
@@ -154,7 +155,7 @@ try {
         if ($path === 'ai/generate-exam' && $method === 'POST') {
             respondSuccess([], 'Exam generation endpoint');
         } elseif ($path === 'ai/chat' && $method === 'POST') {
-            respondSuccess([], 'Chat endpoint');
+            AIController::chat();
         } else {
             respondError('Rota não encontrada', 404);
         }

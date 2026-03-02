@@ -27,6 +27,6 @@ export async function askChatGPT(message, apiFunction) {
         return reply || 'Sem resposta da IA.';
     } catch (err) {
         console.error('askChatGPT error:', err);
-        return 'Erro ao conectar com a IA.';
+        return err?.message || 'Erro ao conectar com a IA.';
     }
 }
