@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, User, Bot, Sparkles, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription } from '@/components/ui/dialog';
+import { useAuth } from '@/contexts/MockAuthContext';
+import { askChatGPT } from '@/lib/chatgpt';
 
 const TeacherModal = ({ isOpen, onClose, initialTopic = '' }) => {
+  const { api } = useAuth();
   const [topic, setTopic] = useState(initialTopic);
   const [messages, setMessages] = useState([
     { role: 'ai', text: "Olá! Sou seu professor IA. Qual assunto você gostaria de aprender hoje?" }
@@ -25,7 +28,7 @@ const TeacherModal = ({ isOpen, onClose, initialTopic = '' }) => {
     }
   }, [messages, isLoading]);
 
-  const handlePersonalize = () => {
+  const handlePersonalize = async () => {
     if (!topic.trim()) return;
 
     const userMessage = { role: 'user', text: topic };
@@ -33,16 +36,25 @@ const TeacherModal = ({ isOpen, onClose, initialTopic = '' }) => {
     setTopic('');
     setIsLoading(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      const aiResponse = {
-        role: 'ai',
-        title: userMessage.text,
-        text: `Preparei uma aula exclusiva sobre "${userMessage.text}". \n\n1. Conceitos Fundamentais\nO conceito principal envolve entender a estrutura básica e suas interações no sistema.\n\n2. Aplicações Práticas\nIsso é utilizado frequentemente em cenários do mundo real para otimizar processos.\n\n3. Exercícios de Fixação\nTente aplicar este conceito em um problema simples para consolidar o aprendizado.\n\nVamos aprofundar em algum ponto específico?`
-      };
-      setMessages(prev => [...prev, aiResponse]);
+    try {
+      const prompt = [
+        {
+          role: 'system',
+          content: 'Você é um professor particular didático e objetivo. Responda em português com explicação em tópicos e finalize com uma pergunta de acompanhamento.'
+        },
+        {
+          role: 'user',
+          content: `Quero aprender sobre: ${userMessage.text}`
+        }
+      ];
+
+      const reply = await askChatGPT(prompt, api);
+      setMessages(prev => [...prev, { role: 'ai', title: userMessage.text, text: reply }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'ai', title: userMessage.text, text: 'Não foi possível consultar a IA agora. Tente novamente em instantes.' }]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -151,8 +163,8 @@ const TeacherModal = ({ isOpen, onClose, initialTopic = '' }) => {
                 Pressione Enter para enviar • IA treinada em conteúdo educacional
               </div>
             </div>
-          </motion.div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
     </AnimatePresence>
   );

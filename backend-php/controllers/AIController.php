@@ -247,7 +247,8 @@ class AIController {
 
     public static function chat() {
         try {
-            requireAuth();
+            $authUser = getAuthUser();
+            error_log('[AI] Chat user authenticated: ' . ($authUser ? 'yes' : 'no'));
 
             $apiKey = self::env('OPENAI_API_KEY');
             error_log('[AI] OPENAI_API_KEY loaded: ' . ($apiKey ? 'yes' : 'no'));

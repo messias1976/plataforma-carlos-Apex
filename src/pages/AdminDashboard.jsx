@@ -38,9 +38,19 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const subsData = await api.subscriptions.getAll();
-            const contentData = await api.topicContent.getAll();
-            const subjectsData = await api.subjects.getAll();
+            const subsResponse = await api.subscriptions.getAll();
+            const contentResponse = await api.topicContent.getAll();
+            const subjectsResponse = await api.subjects.getAll();
+
+            const subsData = Array.isArray(subsResponse?.data)
+                ? subsResponse.data
+                : (Array.isArray(subsResponse) ? subsResponse : []);
+            const contentData = Array.isArray(contentResponse?.data)
+                ? contentResponse.data
+                : (Array.isArray(contentResponse) ? contentResponse : []);
+            const subjectsData = Array.isArray(subjectsResponse?.data)
+                ? subjectsResponse.data
+                : (Array.isArray(subjectsResponse) ? subjectsResponse : []);
 
             const formattedUsers = subsData?.map(sub => ({
                 id: sub.user_id,

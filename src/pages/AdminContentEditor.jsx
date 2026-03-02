@@ -14,11 +14,23 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { FileText, Video, Mic, File, Save, Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Helmet } from 'react-helmet-async';
+import apiClient from '@/lib/api';
+
+const DEFAULT_MODULES = [
+  { id: 1, name: '📘 MÓDULO 1 — FOCO', description: 'o maior problema do aluno' },
+  { id: 2, name: '📘 MÓDULO 2 — TEMPO', description: 'por que parece que nunca sobra' },
+  { id: 3, name: '📘 MÓDULO 3 — ATENÇÃO', description: 'como estudar mesmo sendo distraído' },
+  { id: 4, name: '📘 MÓDULO 4 — MEMÓRIA', description: 'por que você esquece tudo' },
+  { id: 5, name: '📘 MÓDULO 5 — PROVA', description: 'como não travar na hora H' },
+  { id: 6, name: '📘 MÓDULO 6 — CONSTÂNCIA', description: 'como não desistir' },
+  { id: 7, name: '📘 MÓDULO 7 — MENTALIDADE', description: 'parar de se sentir incapaz' }
+];
 
 const AdminContentEditor = () => {
   const { createContent, fetchContentByTopic, uploadFile, deleteContent } = useContentManagement();
   const [existingContent, setExistingContent] = useState([]);
   const [selectedModule, setSelectedModule] = useState('');
+  const [modules, setModules] = useState(DEFAULT_MODULES);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -32,15 +44,30 @@ const AdminContentEditor = () => {
   const [contentToDelete, setContentToDelete] = useState(null);
   const { toast } = useToast();
 
-  const modules = [
-    { id: 1, name: '📘 MÓDULO 1 — FOCO', description: 'o maior problema do aluno' },
-    { id: 2, name: '📘 MÓDULO 2 — TEMPO', description: 'por que parece que nunca sobra' },
-    { id: 3, name: '📘 MÓDULO 3 — ATENÇÃO', description: 'como estudar mesmo sendo distraído' },
-    { id: 4, name: '📘 MÓDULO 4 — MEMÓRIA', description: 'por que você esquece tudo' },
-    { id: 5, name: '📘 MÓDULO 5 — PROVA', description: 'como não travar na hora H' },
-    { id: 6, name: '📘 MÓDULO 6 — CONSTÂNCIA', description: 'como não desistir' },
-    { id: 7, name: '📘 MÓDULO 7 — MENTALIDADE', description: 'parar de se sentir incapaz' }
-  ];
+  useEffect(() => {
+    const loadTopics = async () => {
+      try {
+        const response = await apiClient.topics.getAll();
+        const topicList = Array.isArray(response?.data)
+          ? response.data
+          : (Array.isArray(response) ? response : []);
+
+        if (topicList.length > 0) {
+          setModules(
+            topicList.map((topic) => ({
+              id: topic.id,
+              name: topic?.name || topic?.title || `Tópico ${topic.id}`,
+              description: topic?.description || ''
+            }))
+          );
+        }
+      } catch (error) {
+        console.error('Erro ao carregar tópicos no editor:', error);
+      }
+    };
+
+    loadTopics();
+  }, []);
 
   useEffect(() => {
     if (selectedModule) {
@@ -82,6 +109,7 @@ const AdminContentEditor = () => {
 
       const contentData = {
         module_id: parseInt(selectedModule, 10),
+        topic_id: parseInt(selectedModule, 10),
         title,
         description,
         type: activeTab,

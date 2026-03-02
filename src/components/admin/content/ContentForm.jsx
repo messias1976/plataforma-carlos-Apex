@@ -133,8 +133,8 @@ const ContentForm = ({ isOpen, onClose, topicId, contentToEdit, onSuccess }) => 
             <div className="space-y-2">
               <Label htmlFor="type">{t('admin.content.contentType')}</Label>
               <Select
-                value={formData.type}
-                onValueChange={(value) => setFormData({ ...formData, type: value })}
+                value={formData.content_type}
+                onValueChange={(value) => setFormData({ ...formData, content_type: value })}
               >
                 <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                   <SelectValue placeholder="Select type" />
@@ -142,8 +142,8 @@ const ContentForm = ({ isOpen, onClose, topicId, contentToEdit, onSuccess }) => 
                 <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   <SelectItem value="text">Text / Article</SelectItem>
                   <SelectItem value="video">Video</SelectItem>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="exercise">Exercise</SelectItem>
+                  <SelectItem value="audio">Audio</SelectItem>
+                  <SelectItem value="document">Document</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -159,7 +159,7 @@ const ContentForm = ({ isOpen, onClose, topicId, contentToEdit, onSuccess }) => 
             />
           </div>
 
-          {(formData.type === 'video' || formData.type === 'image') && (
+          {(formData.content_type === 'video' || formData.content_type === 'audio' || formData.content_type === 'document') && (
             <div className="space-y-2">
               <Label htmlFor="url">{t('admin.content.mediaUrl')} *</Label>
               <Input
