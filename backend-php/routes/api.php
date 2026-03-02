@@ -153,7 +153,7 @@ try {
     // AI Routes (placeholders)
     elseif ($resource === 'ai') {
         if ($path === 'ai/generate-exam' && $method === 'POST') {
-            respondSuccess([], 'Exam generation endpoint');
+            AIController::generateExam();
         } elseif ($path === 'ai/chat' && $method === 'POST') {
             AIController::chat();
         } else {
