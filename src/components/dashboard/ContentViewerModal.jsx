@@ -95,7 +95,7 @@ const ContentViewerModal = ({ isOpen, onClose, content }) => {
               {content.type === 'audio' && <Mic className="w-5 h-5 text-purple-400" />}
               {content.title}
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription id="content-viewer-desc" className="text-slate-400">
               {content.description}
             </DialogDescription>
           </DialogHeader>

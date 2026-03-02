@@ -35,14 +35,25 @@ export const useSubscription = () => {
 
   useEffect(() => {
     console.log('useSubscription: useEffect triggered, user changed:', userId || 'null');
-    fetchSubscription();
+    let timeout = null;
 
-    const timeout = setTimeout(() => {
-      console.log('useSubscription: Timeout reached, forcing loading false');
-      setLoading(false);
-    }, 10000);
+    if (userId) {
+      timeout = setTimeout(() => {
+        setLoading((prev) => (prev ? false : prev));
+      }, 10000);
+    }
 
-    return () => clearTimeout(timeout);
+    fetchSubscription().finally(() => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    });
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
   }, [fetchSubscription, userId]);
 
   // Derived state

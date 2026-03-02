@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -112,6 +112,9 @@ const ContentForm = ({ isOpen, onClose, topicId, contentToEdit, onSuccess }) => 
       <DialogContent className="bg-slate-900 border-slate-800 text-white sm:max-w-[800px] max-h-[90vh] overflow-y-auto" aria-describedby="content-form-desc">
         <DialogHeader>
           <DialogTitle>{contentToEdit ? t('common.edit') : t('common.add')} {t('admin.content.manageContent')}</DialogTitle>
+          <DialogDescription id="content-form-desc" className="sr-only">
+            Formulário para criar ou editar conteúdo de um tópico.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">

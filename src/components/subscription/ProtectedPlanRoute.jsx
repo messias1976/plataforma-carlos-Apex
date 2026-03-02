@@ -43,7 +43,7 @@ const ProtectedPlanRoute = ({ children, feature }) => {
               <Crown className="w-6 h-6 text-amber-500" />
             </div>
             <DialogTitle className="text-center text-xl">{t('common.upgradeTitle')}</DialogTitle>
-            <DialogDescription className="text-center text-slate-400">
+            <DialogDescription id="protected-plan-desc" className="text-center text-slate-400">
               Este recurso ({feature}) requer um plano superior.
               <br />
               Seu plano atual: <span className="text-white font-semibold uppercase">{planType}</span>

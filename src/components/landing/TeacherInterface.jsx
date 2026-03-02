@@ -113,7 +113,7 @@ const TeacherInterface = ({ isOpen, onClose }) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[700px] h-[80vh] bg-slate-950 border-slate-800 text-white p-0 flex flex-col overflow-hidden shadow-2xl shadow-green-900/20" aria-describedby="teacher-interface-desc">
                 <DialogTitle className="sr-only">Chat com Professor</DialogTitle>
-                <DialogDescription id="teacher-modal-desc" className="sr-only">
+                <DialogDescription id="teacher-interface-desc" className="sr-only">
                     Janela de chat com o professor IA. Converse, tire dúvidas e peça explicações sobre qualquer matéria.
                 </DialogDescription>
 

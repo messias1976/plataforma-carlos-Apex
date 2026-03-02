@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -72,6 +72,9 @@ const TopicForm = ({ isOpen, onClose, topic = null, subjectId, onSuccess }) => {
       <DialogContent className="bg-slate-900 border-slate-800 text-white" aria-describedby="topic-form-desc">
         <DialogHeader>
           <DialogTitle>{topic ? t('admin.subjects.editTopic') : t('admin.subjects.addTopic')}</DialogTitle>
+          <DialogDescription id="topic-form-desc" className="sr-only">
+            Formulário para criar ou editar um tópico da matéria.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

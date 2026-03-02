@@ -150,7 +150,7 @@ const SubjectEditor = ({ isOpen, onClose, topic }) => {
                 <div className="p-6 border-b border-slate-800">
                     <DialogHeader>
                         <DialogTitle className="text-2xl">{t('admin.editor.title')}: <span className="text-neon-400">{topic?.name}</span></DialogTitle>
-                        <DialogDescription className="text-slate-400">
+                        <DialogDescription id="subject-editor-desc" className="text-slate-400">
                             Gerencie textos, vídeos, áudios e documentos para este tópico.
                         </DialogDescription>
                     </DialogHeader>
