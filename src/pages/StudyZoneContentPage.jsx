@@ -10,18 +10,54 @@ import api from '@/lib/api';
 const StudyZoneContentPage = () => {
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState([]);
+  const [sourceType, setSourceType] = useState('subjects');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSubjects = async () => {
       setLoading(true);
       try {
-        const response = await api.subjects.getAll();
-        const list = Array.isArray(response?.data)
-          ? response.data
-          : (Array.isArray(response) ? response : []);
+        const subjectsResponse = await api.subjects.getAll();
+        const subjectsList = Array.isArray(subjectsResponse?.data)
+          ? subjectsResponse.data
+          : (Array.isArray(subjectsResponse) ? subjectsResponse : []);
 
-        setSubjects(list);
+        if (subjectsList.length > 0) {
+          setSubjects(subjectsList);
+          setSourceType('subjects');
+        } else {
+          const topicsResponse = await api.topics.getAll();
+          const topicsList = Array.isArray(topicsResponse?.data)
+            ? topicsResponse.data
+            : (Array.isArray(topicsResponse) ? topicsResponse : []);
+
+          if (topicsList.length > 0) {
+            setSubjects(topicsList);
+            setSourceType('topics');
+          } else {
+            const contentResponse = await api.topicContent.getAll();
+            const contentList = Array.isArray(contentResponse?.data)
+              ? contentResponse.data
+              : (Array.isArray(contentResponse) ? contentResponse : []);
+
+            const modulesById = new Map();
+            contentList.forEach((item) => {
+              const key = item?.topic_id || item?.module_id;
+              if (!key) return;
+
+              if (!modulesById.has(String(key))) {
+                modulesById.set(String(key), {
+                  id: String(key),
+                  name: `Módulo ${key}`,
+                  description: 'Conteúdo cadastrado no gerenciador'
+                });
+              }
+            });
+
+            setSubjects(Array.from(modulesById.values()));
+            setSourceType('module-content');
+          }
+        }
       } catch (error) {
         console.error('Erro ao carregar módulos:', error);
         setSubjects([]);
@@ -58,7 +94,7 @@ const StudyZoneContentPage = () => {
               <Card
                 key={subject.id}
                 className="bg-slate-900 border-slate-800 hover:border-neon-500 transition-all group cursor-pointer h-full"
-                onClick={() => navigate(`/study-zone/${subject.id}`)}
+                onClick={() => navigate(sourceType === 'subjects' ? `/study-zone/${subject.id}` : `/topic/${subject.id}`)}
               >
                 <CardHeader>
                   <div className="flex items-center gap-3 mb-2">

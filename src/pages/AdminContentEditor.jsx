@@ -1,6 +1,6 @@
 // src/pages/AdminContentEditor.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useContentManagement } from '@/hooks/useContentManagement';
@@ -69,18 +69,18 @@ const AdminContentEditor = () => {
     loadTopics();
   }, []);
 
+  const loadModuleContent = useCallback(async (moduleId) => {
+    const data = await fetchContentByTopic(moduleId);
+    setExistingContent(data || []);
+  }, [fetchContentByTopic]);
+
   useEffect(() => {
     if (selectedModule) {
       loadModuleContent(selectedModule);
     } else {
       setExistingContent([]);
     }
-  }, [selectedModule]);
-
-  const loadModuleContent = async (moduleId) => {
-    const data = await fetchContentByTopic(moduleId);
-    setExistingContent(data || []);
-  };
+  }, [selectedModule, loadModuleContent]);
 
   const handleSave = async () => {
     if (!selectedModule || !title) {
@@ -108,8 +108,8 @@ const AdminContentEditor = () => {
       }
 
       const contentData = {
-        module_id: parseInt(selectedModule, 10),
-        topic_id: parseInt(selectedModule, 10),
+        module_id: selectedModule,
+        topic_id: selectedModule,
         title,
         description,
         type: activeTab,

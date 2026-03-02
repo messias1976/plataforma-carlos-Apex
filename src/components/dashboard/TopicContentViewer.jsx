@@ -25,15 +25,30 @@ const TopicContentViewer = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch Topic Info
-        const topicData = await api.topics.getById(topicId);
+        // Fetch Topic Info (best effort)
+        const topicResponse = await api.topics.getById(topicId);
+        const topicData = topicResponse?.data || topicResponse || null;
         setTopic(topicData);
+      } catch (error) {
+        setTopic({ id: topicId, name: `Módulo ${topicId}` });
+      }
 
+      try {
         // Fetch Content
-        const contentData = await api.topicContent.getAll(topicId);
-        setContent(contentData || []);
+        const contentResponse = await api.topicContent.getAll(topicId);
+        const contentData = Array.isArray(contentResponse?.data)
+          ? contentResponse.data
+          : (Array.isArray(contentResponse) ? contentResponse : []);
+
+        const normalizedContent = contentData.map((item) => ({
+          ...item,
+          type: item?.type || item?.content_type || 'text'
+        }));
+
+        setContent(normalizedContent);
       } catch (error) {
         console.error('Error fetching topic content:', error);
+        setContent([]);
       } finally {
         setLoading(false);
       }
