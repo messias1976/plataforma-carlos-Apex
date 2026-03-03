@@ -84,9 +84,13 @@ const StudyZoneContentPage = () => {
             const contentList = extractList(contentResponse);
 
             const modulesById = new Map();
+            const orphanContents = [];
             contentList.forEach((item) => {
               const key = resolveContentTopicKey(item);
-              if (!key) return;
+              if (!key) {
+                orphanContents.push(item);
+                return;
+              }
 
               const stringKey = String(key);
               if (!modulesById.has(stringKey)) {
@@ -97,6 +101,14 @@ const StudyZoneContentPage = () => {
                 });
               }
             });
+
+            if (orphanContents.length > 0 && !modulesById.has('__all__')) {
+              modulesById.set('__all__', {
+                id: '__all__',
+                name: 'Materiais',
+                description: 'Conteúdos do gerenciador sem módulo vinculado'
+              });
+            }
 
             const moduleList = Array.from(modulesById.values());
             if (moduleList.length > 0) {
@@ -145,7 +157,19 @@ const StudyZoneContentPage = () => {
               <Card
                 key={subject.id}
                 className="bg-slate-900 border-slate-800 hover:border-neon-500 transition-all group cursor-pointer h-full"
-                onClick={() => navigate(sourceType === 'subjects' ? `/study-zone/${subject.id}` : `/topic/${subject.id}`)}
+                onClick={() => {
+                  if (sourceType === 'subjects') {
+                    navigate(`/study-zone/${subject.id}`);
+                    return;
+                  }
+
+                  if (sourceType === 'module-content' && subject.id === '__all__') {
+                    navigate('/topic/all');
+                    return;
+                  }
+
+                  navigate(`/topic/${subject.id}`);
+                }}
               >
                 <CardHeader>
                   <div className="flex items-center gap-3 mb-2">

@@ -78,16 +78,22 @@ const TopicContentViewer = () => {
       setLoading(true);
       try {
         // Fetch Topic Info (best effort)
-        const topicResponse = await api.topics.getById(topicId);
-        const topicData = topicResponse?.data || topicResponse || null;
-        setTopic(topicData);
+        if (topicId === 'all') {
+          setTopic({ id: 'all', name: 'Materiais' });
+        } else {
+          const topicResponse = await api.topics.getById(topicId);
+          const topicData = topicResponse?.data || topicResponse || null;
+          setTopic(topicData);
+        }
       } catch (error) {
         setTopic({ id: topicId, name: `Módulo ${topicId}` });
       }
 
       try {
         // Fetch Content
-        const contentResponse = await api.topicContent.getAll(topicId);
+        const contentResponse = topicId === 'all'
+          ? await api.topicContent.getAll()
+          : await api.topicContent.getAll(topicId);
         const contentData = Array.isArray(contentResponse?.data)
           ? contentResponse.data
           : (Array.isArray(contentResponse) ? contentResponse : []);

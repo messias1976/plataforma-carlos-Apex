@@ -55,13 +55,19 @@ const AdminContentEditor = () => {
           : (Array.isArray(response) ? response : []);
 
         if (topicList.length > 0) {
-          setModules(
-            topicList.map((topic) => ({
-              id: topic.id,
-              name: topic?.name || topic?.title || `Tópico ${topic.id}`,
-              description: topic?.description || ''
-            }))
-          );
+          const normalizedTopics = topicList
+            .map((topic, index) => {
+              const id = topic?.id != null ? String(topic.id) : null;
+              if (!id) return null;
+              return {
+                id,
+                name: topic?.name || topic?.title || `Tópico ${index + 1}`,
+                description: topic?.description || ''
+              };
+            })
+            .filter(Boolean);
+
+          setModules(normalizedTopics.length > 0 ? normalizedTopics : FALLBACK_MODULES);
         } else {
           setModules(FALLBACK_MODULES);
         }
@@ -76,7 +82,11 @@ const AdminContentEditor = () => {
 
   const loadModuleContent = useCallback(async (moduleId) => {
     const data = await fetchContentByTopic(moduleId);
-    setExistingContent(data || []);
+    const normalized = (data || []).map((item) => ({
+      ...item,
+      type: item?.content_type || item?.type || 'text'
+    }));
+    setExistingContent(normalized);
   }, [fetchContentByTopic]);
 
   useEffect(() => {
