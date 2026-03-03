@@ -21,7 +21,36 @@ const SubjectContentPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  const normalizeContentType = (item) => item?.type || item?.content_type || 'text';
+  const parseDataField = (dataField) => {
+    if (!dataField) return {};
+    if (typeof dataField === 'object') return dataField;
+    if (typeof dataField === 'string') {
+      try {
+        const parsed = JSON.parse(dataField);
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  };
+
+  const normalizeContentType = (item) => {
+    const parsedData = parseDataField(item?.data);
+    const rawType = String(item?.type || '').toLowerCase();
+    return String(
+      item?.content_type ||
+      parsedData?.content_type ||
+      (rawType !== 'content' && rawType !== 'lesson' ? item?.type : null) ||
+      parsedData?.type ||
+      'text'
+    ).toLowerCase();
+  };
+
+  const normalizeContentUrl = (item) => {
+    const parsedData = parseDataField(item?.data);
+    return item?.url || item?.file_url || item?.fileUrl || parsedData?.url || parsedData?.file_url || parsedData?.fileUrl || '';
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -53,6 +82,7 @@ const SubjectContentPage = () => {
             const withTopicName = contentData.map(c => ({
               ...c,
               type: normalizeContentType(c),
+              url: normalizeContentUrl(c),
               topic: { name: topicName }
             }));
             allContent.push(...withTopicName);

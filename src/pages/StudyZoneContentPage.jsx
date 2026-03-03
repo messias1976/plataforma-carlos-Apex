@@ -13,54 +13,105 @@ const StudyZoneContentPage = () => {
   const [sourceType, setSourceType] = useState('subjects');
   const [loading, setLoading] = useState(true);
 
+  const extractList = (response) => {
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response?.data)) return response.data;
+    if (Array.isArray(response?.data?.data)) return response.data.data;
+    if (Array.isArray(response?.items)) return response.items;
+    if (Array.isArray(response?.results)) return response.results;
+    return [];
+  };
+
+  const resolveContentTopicKey = (item) => {
+    const directKey = item?.topic_id || item?.module_id;
+    if (directKey) return String(directKey);
+
+    if (typeof item?.data === 'string') {
+      try {
+        const parsed = JSON.parse(item.data);
+        const parsedKey = parsed?.topic_id || parsed?.module_id;
+        if (parsedKey) return String(parsedKey);
+      } catch {
+        return null;
+      }
+    }
+
+    if (item?.data && typeof item.data === 'object') {
+      const dataKey = item.data?.topic_id || item.data?.module_id;
+      if (dataKey) return String(dataKey);
+    }
+
+    return null;
+  };
+
   useEffect(() => {
     const loadSubjects = async () => {
       setLoading(true);
       try {
-        const subjectsResponse = await api.subjects.getAll();
-        const subjectsList = Array.isArray(subjectsResponse?.data)
-          ? subjectsResponse.data
-          : (Array.isArray(subjectsResponse) ? subjectsResponse : []);
+        let loaded = false;
 
-        if (subjectsList.length > 0) {
-          setSubjects(subjectsList);
-          setSourceType('subjects');
-        } else {
-          const topicsResponse = await api.topics.getAll();
-          const topicsList = Array.isArray(topicsResponse?.data)
-            ? topicsResponse.data
-            : (Array.isArray(topicsResponse) ? topicsResponse : []);
+        try {
+          const subjectsResponse = await api.subjects.getAll();
+          const subjectsList = extractList(subjectsResponse);
 
-          if (topicsList.length > 0) {
-            setSubjects(topicsList);
-            setSourceType('topics');
-          } else {
+          if (subjectsList.length > 0) {
+            setSubjects(subjectsList);
+            setSourceType('subjects');
+            loaded = true;
+          }
+        } catch (error) {
+          console.error('Falha ao carregar subjects:', error);
+        }
+
+        if (!loaded) {
+          try {
+            const topicsResponse = await api.topics.getAll();
+            const topicsList = extractList(topicsResponse);
+
+            if (topicsList.length > 0) {
+              setSubjects(topicsList);
+              setSourceType('topics');
+              loaded = true;
+            }
+          } catch (error) {
+            console.error('Falha ao carregar topics:', error);
+          }
+        }
+
+        if (!loaded) {
+          try {
             const contentResponse = await api.topicContent.getAll();
-            const contentList = Array.isArray(contentResponse?.data)
-              ? contentResponse.data
-              : (Array.isArray(contentResponse) ? contentResponse : []);
+            const contentList = extractList(contentResponse);
 
             const modulesById = new Map();
             contentList.forEach((item) => {
-              const key = item?.topic_id || item?.module_id;
+              const key = resolveContentTopicKey(item);
               if (!key) return;
 
-              if (!modulesById.has(String(key))) {
-                modulesById.set(String(key), {
-                  id: String(key),
-                  name: `Módulo ${key}`,
-                  description: 'Conteúdo cadastrado no gerenciador'
+              const stringKey = String(key);
+              if (!modulesById.has(stringKey)) {
+                modulesById.set(stringKey, {
+                  id: stringKey,
+                  name: item?.topic?.name || item?.name || item?.title || `Módulo ${stringKey}`,
+                  description: item?.description || 'Conteúdo cadastrado no gerenciador'
                 });
               }
             });
 
-            setSubjects(Array.from(modulesById.values()));
-            setSourceType('module-content');
+            const moduleList = Array.from(modulesById.values());
+            if (moduleList.length > 0) {
+              setSubjects(moduleList);
+              setSourceType('module-content');
+              loaded = true;
+            }
+          } catch (error) {
+            console.error('Falha ao carregar topic-content:', error);
           }
         }
-      } catch (error) {
-        console.error('Erro ao carregar módulos:', error);
-        setSubjects([]);
+
+        if (!loaded) {
+          setSubjects([]);
+        }
       } finally {
         setLoading(false);
       }

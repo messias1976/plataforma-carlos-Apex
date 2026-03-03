@@ -52,18 +52,22 @@ const AdminDashboard = () => {
                 ? subjectsResponse.data
                 : (Array.isArray(subjectsResponse) ? subjectsResponse : []);
 
-            const formattedUsers = subsData?.map(sub => ({
-                id: sub.user_id,
-                email: sub.email || `user_${sub.user_id.substring(0, 6)}...`,
-                plan: sub.plan_type,
-                status: sub.status,
-                created_at: sub.created_at
-            })) || [];
+            const formattedUsers = subsData?.map((sub, index) => {
+                const userId = sub?.user_id != null ? String(sub.user_id) : `unknown-${index}`;
+                return {
+                    id: userId,
+                    email: sub?.email || `user_${userId.slice(0, 6)}...`,
+                    plan: sub?.plan_type || 'free',
+                    status: sub?.status || 'inactive',
+                    created_at: sub?.created_at || null
+                };
+            }) || [];
             setUsers(formattedUsers);
 
             const breakdown = { text: 0, video: 0, audio: 0, document: 0 };
-            contentData?.forEach(item => {
-                if (breakdown[item.content_type] !== undefined) breakdown[item.content_type]++;
+            contentData?.forEach((item) => {
+                const contentType = item?.content_type;
+                if (contentType && breakdown[contentType] !== undefined) breakdown[contentType]++;
             });
 
             setStats({
@@ -81,10 +85,12 @@ const AdminDashboard = () => {
         }
     };
 
-    const filteredUsers = users.filter(u =>
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.plan.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredUsers = users.filter((u) => {
+        const email = String(u?.email || '').toLowerCase();
+        const plan = String(u?.plan || '').toLowerCase();
+        const query = search.toLowerCase();
+        return email.includes(query) || plan.includes(query);
+    });
 
     return (
         <div className="min-h-screen bg-slate-950 text-white">
@@ -156,7 +162,9 @@ const AdminDashboard = () => {
                                                     {user.status}
                                                 </span>
                                             </TableCell>
-                                            <TableCell className="text-slate-400 text-sm">{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                                            <TableCell className="text-slate-400 text-sm">
+                                                {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
+                                            </TableCell>
                                             <TableCell className="text-right">
                                                 <Button size="sm" variant="ghost">{t('common.edit')}</Button>
                                             </TableCell>

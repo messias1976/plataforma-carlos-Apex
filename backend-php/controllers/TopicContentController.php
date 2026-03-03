@@ -20,8 +20,8 @@ class TopicContentController {
             $hasDataColumn = self::hasColumn('contents', 'data');
 
             $sql = $hasDataColumn
-                ? 'SELECT id, title, description, data FROM contents WHERE type = "lesson" OR type = "content"'
-                : 'SELECT id, title, description FROM contents WHERE type = "lesson" OR type = "content"';
+                ? 'SELECT id, title, description, data FROM contents WHERE (type = "lesson" OR type = "content")'
+                : 'SELECT id, title, description FROM contents WHERE (type = "lesson" OR type = "content")';
             $params = [];
 
             if ($topicId && $hasDataColumn) {
@@ -90,9 +90,19 @@ class TopicContentController {
             $data = getJsonBody();
             $title = $data['title'] ?? '';
             $description = $data['description'] ?? '';
+            $topicId = $data['topic_id'] ?? ($data['module_id'] ?? null);
 
             if (empty($title)) {
                 respondError('Título é obrigatório', 400);
+            }
+
+            if (empty($topicId)) {
+                respondError('topic_id é obrigatório', 400);
+            }
+
+            $data['topic_id'] = (string) $topicId;
+            if (!isset($data['content_type']) && isset($data['type'])) {
+                $data['content_type'] = $data['type'];
             }
 
             $db = self::getDb();
@@ -127,9 +137,19 @@ class TopicContentController {
             $data = getJsonBody();
             $title = $data['title'] ?? '';
             $description = $data['description'] ?? '';
+            $topicId = $data['topic_id'] ?? ($data['module_id'] ?? null);
 
             if (empty($title)) {
                 respondError('Título é obrigatório', 400);
+            }
+
+            if (empty($topicId)) {
+                respondError('topic_id é obrigatório', 400);
+            }
+
+            $data['topic_id'] = (string) $topicId;
+            if (!isset($data['content_type']) && isset($data['type'])) {
+                $data['content_type'] = $data['type'];
             }
 
             $db = self::getDb();

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '@/lib/api';
+import api, { API_BASE } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, ChevronLeft, ChevronRight, FileText, Video, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, FileText, Video, Mic, Download } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from '@/hooks/useWindowSize';
@@ -20,6 +20,58 @@ const TopicContentViewer = () => {
   const [loading, setLoading] = useState(true);
   const [topic, setTopic] = useState(null);
   const [completed, setCompleted] = useState(false);
+
+  const parseDataField = (dataField) => {
+    if (!dataField) return {};
+    if (typeof dataField === 'object') return dataField;
+    if (typeof dataField === 'string') {
+      try {
+        const parsed = JSON.parse(dataField);
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  };
+
+  const resolveContentUrl = (rawUrl) => {
+    if (!rawUrl) return '';
+    if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+    if (rawUrl.startsWith('/')) return rawUrl;
+    return `${API_BASE.replace(/\/+$/, '')}/${rawUrl.replace(/^\/+/, '')}`;
+  };
+
+  const buildProtectedUrl = (rawUrl) => {
+    if (!rawUrl) return rawUrl;
+
+    const token = localStorage.getItem('token');
+    const resolvedUrl = resolveContentUrl(rawUrl);
+    if (!token) return resolvedUrl;
+
+    const separator = resolvedUrl.includes('?') ? '&' : '?';
+    return `${resolvedUrl}${separator}token=${encodeURIComponent(token)}`;
+  };
+
+  const getVideoEmbedUrl = (rawUrl) => {
+    if (!rawUrl) return null;
+
+    if (rawUrl.includes('youtube.com/watch?v=')) {
+      return rawUrl.replace('watch?v=', 'embed/');
+    }
+
+    if (rawUrl.includes('youtu.be/')) {
+      const id = rawUrl.split('youtu.be/')[1]?.split(/[?&]/)[0];
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+
+    if (rawUrl.includes('vimeo.com/')) {
+      const id = rawUrl.split('vimeo.com/')[1]?.split(/[?&]/)[0];
+      return id ? `https://player.vimeo.com/video/${id}` : null;
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,10 +92,26 @@ const TopicContentViewer = () => {
           ? contentResponse.data
           : (Array.isArray(contentResponse) ? contentResponse : []);
 
-        const normalizedContent = contentData.map((item) => ({
-          ...item,
-          type: item?.type || item?.content_type || 'text'
-        }));
+        const normalizedContent = contentData.map((item) => {
+          const parsedData = parseDataField(item?.data);
+          const rawType = String(item?.type || '').toLowerCase();
+          const contentType = String(
+            item?.content_type ||
+            parsedData?.content_type ||
+            (rawType !== 'content' && rawType !== 'lesson' ? item?.type : null) ||
+            parsedData?.type ||
+            'text'
+          ).toLowerCase();
+          const contentUrl = item?.url || item?.file_url || item?.fileUrl || parsedData?.url || parsedData?.file_url || parsedData?.fileUrl || '';
+          const contentText = item?.content_text || parsedData?.content_text || null;
+
+          return {
+            ...item,
+            type: contentType,
+            url: contentUrl,
+            content_text: contentText,
+          };
+        });
 
         setContent(normalizedContent);
       } catch (error) {
@@ -115,16 +183,31 @@ const TopicContentViewer = () => {
               <h2 className="text-2xl md:text-3xl font-bold text-center mb-6">{currentItem.title}</h2>
 
               {/* Content Renderers */}
-              {currentItem.type === 'video' && (
-                <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800">
-                  <iframe
-                    src={currentItem.url?.replace('watch?v=', 'embed/')}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              )}
+              {currentItem.type === 'video' && (() => {
+                const embedUrl = getVideoEmbedUrl(currentItem.url);
+
+                if (embedUrl) {
+                  return (
+                    <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title={currentItem.title || 'Vídeo'}
+                      />
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800 flex items-center justify-center">
+                    <video controls className="w-full h-full" src={buildProtectedUrl(currentItem.url)}>
+                      Seu navegador não suporta a tag de vídeo.
+                    </video>
+                  </div>
+                );
+              })()}
 
               {currentItem.type === 'image' && (
                 <div className="rounded-xl overflow-hidden shadow-2xl border border-slate-800">
@@ -136,6 +219,37 @@ const TopicContentViewer = () => {
                 <div className="prose prose-invert max-w-none bg-slate-900/50 p-6 rounded-xl border border-slate-800">
                   <div dangerouslySetInnerHTML={{ __html: currentItem.content_text || currentItem.description }} />
                 </div>
+              )}
+
+              {currentItem.type === 'audio' && (
+                <Card className="p-6 bg-slate-900 border-slate-700">
+                  <div className="flex items-center gap-2 mb-4 text-purple-400">
+                    <Mic className="w-5 h-5" />
+                    <span className="font-bold">Áudio</span>
+                  </div>
+                  <p className="text-slate-300 mb-4">{currentItem.description || 'Ouça o conteúdo abaixo.'}</p>
+                  <audio controls className="w-full">
+                    <source src={buildProtectedUrl(currentItem.url)} />
+                    Seu navegador não suporta o elemento de áudio.
+                  </audio>
+                </Card>
+              )}
+
+              {currentItem.type === 'document' && (
+                <Card className="p-6 bg-slate-900 border-slate-700">
+                  <div className="flex items-center gap-2 mb-4 text-blue-400">
+                    <FileText className="w-5 h-5" />
+                    <span className="font-bold">Documento</span>
+                  </div>
+                  <p className="text-slate-300 mb-4">{currentItem.description || 'Abra o documento para leitura.'}</p>
+                  {currentItem.url && (
+                    <Button asChild variant="outline" className="border-slate-600 text-slate-200">
+                      <a href={buildProtectedUrl(currentItem.url)} target="_blank" rel="noopener noreferrer">
+                        <Download className="w-4 h-4 mr-2" /> Abrir documento
+                      </a>
+                    </Button>
+                  )}
+                </Card>
               )}
 
               {currentItem.type === 'exercise' && (

@@ -11,26 +11,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { FileText, Video, Mic, File, Save, Loader2, Trash2 } from 'lucide-react';
+import { FileText, Video, Mic, File, Save, Loader2, Trash2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Helmet } from 'react-helmet-async';
 import apiClient from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
 
-const DEFAULT_MODULES = [
-  { id: 1, name: '📘 MÓDULO 1 — FOCO', description: 'o maior problema do aluno' },
-  { id: 2, name: '📘 MÓDULO 2 — TEMPO', description: 'por que parece que nunca sobra' },
-  { id: 3, name: '📘 MÓDULO 3 — ATENÇÃO', description: 'como estudar mesmo sendo distraído' },
-  { id: 4, name: '📘 MÓDULO 4 — MEMÓRIA', description: 'por que você esquece tudo' },
-  { id: 5, name: '📘 MÓDULO 5 — PROVA', description: 'como não travar na hora H' },
-  { id: 6, name: '📘 MÓDULO 6 — CONSTÂNCIA', description: 'como não desistir' },
-  { id: 7, name: '📘 MÓDULO 7 — MENTALIDADE', description: 'parar de se sentir incapaz' }
+const FALLBACK_MODULES = [
+  { id: '1', name: '📘 MÓDULO 1 — FOCO', description: 'o maior problema do aluno' },
+  { id: '2', name: '📘 MÓDULO 2 — TEMPO', description: 'por que parece que nunca sobra' },
+  { id: '3', name: '📘 MÓDULO 3 — ATENÇÃO', description: 'como estudar mesmo sendo distraído' },
+  { id: '4', name: '📘 MÓDULO 4 — MEMÓRIA', description: 'por que você esquece tudo' },
+  { id: '5', name: '📘 MÓDULO 5 — PROVA', description: 'como não travar na hora H' },
+  { id: '6', name: '📘 MÓDULO 6 — CONSTÂNCIA', description: 'como não desistir' },
+  { id: '7', name: '📘 MÓDULO 7 — MENTALIDADE', description: 'parar de se sentir incapaz' }
 ];
 
 const AdminContentEditor = () => {
+  const navigate = useNavigate();
   const { createContent, fetchContentByTopic, uploadFile, deleteContent } = useContentManagement();
   const [existingContent, setExistingContent] = useState([]);
   const [selectedModule, setSelectedModule] = useState('');
-  const [modules, setModules] = useState(DEFAULT_MODULES);
+  const [modules, setModules] = useState([]);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -60,9 +62,12 @@ const AdminContentEditor = () => {
               description: topic?.description || ''
             }))
           );
+        } else {
+          setModules(FALLBACK_MODULES);
         }
       } catch (error) {
         console.error('Erro ao carregar tópicos no editor:', error);
+        setModules(FALLBACK_MODULES);
       }
     };
 
@@ -108,11 +113,10 @@ const AdminContentEditor = () => {
       }
 
       const contentData = {
-        module_id: selectedModule,
         topic_id: selectedModule,
         title,
         description,
-        type: activeTab,
+        content_type: activeTab,
         url: finalUrl,
         content_text: activeTab === 'text' ? textContent : null,
         order_index: existingContent.length + 1
@@ -151,6 +155,9 @@ const AdminContentEditor = () => {
     <div className="min-h-screen bg-slate-950 text-white p-8 pb-24">
       <Helmet><title>Editor de Conteúdo - Admin</title></Helmet>
       <div className="max-w-5xl mx-auto space-y-8">
+        <Button variant="ghost" className="text-slate-300 hover:text-white -ml-2" onClick={() => navigate('/admin')}>
+          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
+        </Button>
         <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
           <FileText className="text-neon-500" /> Gerenciar Conteúdo
         </h1>
