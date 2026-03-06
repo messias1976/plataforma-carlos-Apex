@@ -47,6 +47,11 @@ const AdminContentEditor = () => {
   const [contentToDelete, setContentToDelete] = useState(null);
   const { toast } = useToast();
 
+  const safeModules = (modules || []).filter((moduleItem) => {
+    const moduleId = moduleItem?.id;
+    return moduleId != null && String(moduleId).trim() !== '';
+  });
+
   useEffect(() => {
     const loadTopics = async () => {
       try {
@@ -182,12 +187,9 @@ const AdminContentEditor = () => {
                 <SelectValue placeholder="Selecione o módulo" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                {modules.map(m => (
+                {safeModules.map(m => (
                   <SelectItem key={m.id} value={m.id.toString()}>
-                    <div className="flex flex-col">
-                      <span>{m.name}</span>
-                      <span className="text-xs text-slate-400">{m.description}</span>
-                    </div>
+                    {m.description ? `${m.name} - ${m.description}` : m.name}
                   </SelectItem>
                 ))}
               </SelectContent>
