@@ -35,6 +35,45 @@ const TopicContentViewer = () => {
     return {};
   };
 
+  const normalizeContentType = (item) => {
+    const parsedData = parseDataField(item?.data);
+    const rawType = String(
+      item?.content_type ||
+      parsedData?.content_type ||
+      item?.type ||
+      parsedData?.type ||
+      'text'
+    ).toLowerCase();
+
+    if (rawType === 'video' || rawType === 'youtube' || rawType === 'vimeo') {
+      return 'video';
+    }
+
+    if (rawType === 'audio' || rawType === 'mp3' || rawType === 'wav') {
+      return 'audio';
+    }
+
+    if (
+      rawType === 'document' ||
+      rawType === 'doc' ||
+      rawType === 'file' ||
+      rawType === 'arquivo' ||
+      rawType === 'pdf'
+    ) {
+      return 'document';
+    }
+
+    if (rawType === 'image' || rawType === 'img') {
+      return 'image';
+    }
+
+    if (rawType === 'exercise' || rawType === 'quiz') {
+      return 'exercise';
+    }
+
+    return 'text';
+  };
+
   const resolveContentUrl = (rawUrl) => {
     if (!rawUrl) return '';
     if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
@@ -100,26 +139,29 @@ const TopicContentViewer = () => {
 
         const normalizedContent = contentData.map((item) => {
           const parsedData = parseDataField(item?.data);
-          const rawType = String(item?.type || '').toLowerCase();
-          const contentType = String(
-            item?.content_type ||
-            parsedData?.content_type ||
-            (rawType !== 'content' && rawType !== 'lesson' ? item?.type : null) ||
-            parsedData?.type ||
-            'text'
-          ).toLowerCase();
+          const contentType = normalizeContentType(item);
           const contentUrl = item?.url || item?.file_url || item?.fileUrl || parsedData?.url || parsedData?.file_url || parsedData?.fileUrl || '';
           const contentText = item?.content_text || parsedData?.content_text || null;
+          const rawOrderIndex = item?.order_index ?? parsedData?.order_index ?? 0;
+          const normalizedOrder = Number(rawOrderIndex);
 
           return {
             ...item,
             type: contentType,
             url: contentUrl,
             content_text: contentText,
+            order_index: Number.isFinite(normalizedOrder) ? normalizedOrder : 0,
           };
         });
 
-        setContent(normalizedContent);
+        const orderedContent = normalizedContent.sort((a, b) => {
+          if ((a.order_index || 0) !== (b.order_index || 0)) {
+            return (a.order_index || 0) - (b.order_index || 0);
+          }
+          return (a.id || 0) - (b.id || 0);
+        });
+
+        setContent(orderedContent);
       } catch (error) {
         console.error('Error fetching topic content:', error);
         setContent([]);
