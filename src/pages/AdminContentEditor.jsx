@@ -39,6 +39,7 @@ const AdminContentEditor = () => {
   const [textContent, setTextContent] = useState('');
   const [url, setUrl] = useState('');
   const [file, setFile] = useState(null);
+  const [videoLayout, setVideoLayout] = useState('auto');
 
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('text');
@@ -129,6 +130,7 @@ const AdminContentEditor = () => {
         content_type: activeTab,
         url: finalUrl,
         content_text: activeTab === 'text' ? textContent : null,
+        video_layout: activeTab === 'video' ? videoLayout : null,
         order_index: existingContent.length + 1
       };
 
@@ -139,6 +141,7 @@ const AdminContentEditor = () => {
       setTextContent('');
       setUrl('');
       setFile(null);
+      setVideoLayout('auto');
       loadModuleContent(selectedModule);
     } catch (err) {
       console.error(err);
@@ -226,6 +229,20 @@ const AdminContentEditor = () => {
                         <div>
                           <Label>Upload de Vídeo (mp4 )</Label>
                           <Input type="file" accept="video/*" onChange={e => setFile(e.target.files[0])} className="bg-slate-800 border-slate-700 text-white cursor-pointer" />
+                        </div>
+                        <div>
+                          <Label>Formato do Vídeo</Label>
+                          <Select value={videoLayout} onValueChange={setVideoLayout}>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                              <SelectItem value="auto">Automático</SelectItem>
+                              <SelectItem value="landscape">Paisagem (16:9)</SelectItem>
+                              <SelectItem value="portrait">Retrato (9:16)</SelectItem>
+                              <SelectItem value="square">Quadrado (1:1)</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     )}

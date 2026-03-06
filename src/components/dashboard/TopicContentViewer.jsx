@@ -20,6 +20,7 @@ const TopicContentViewer = () => {
   const [loading, setLoading] = useState(true);
   const [topic, setTopic] = useState(null);
   const [completed, setCompleted] = useState(false);
+  const [videoAspectRatio, setVideoAspectRatio] = useState(null);
 
   const parseDataField = (dataField) => {
     if (!dataField) return {};
@@ -92,21 +93,70 @@ const TopicContentViewer = () => {
     return `${resolvedUrl}${separator}token=${encodeURIComponent(token)}`;
   };
 
-  const getVideoEmbedUrl = (rawUrl) => {
+  const getVideoEmbedInfo = (rawUrl) => {
     if (!rawUrl) return null;
 
+    if (rawUrl.includes('youtube.com/shorts/')) {
+      const shortId = rawUrl.split('youtube.com/shorts/')[1]?.split(/[?&/]/)[0];
+      if (shortId) {
+        return {
+          url: `https://www.youtube.com/embed/${shortId}`,
+          aspectRatio: 9 / 16,
+        };
+      }
+    }
+
     if (rawUrl.includes('youtube.com/watch?v=')) {
-      return rawUrl.replace('watch?v=', 'embed/');
+      return {
+        url: rawUrl.replace('watch?v=', 'embed/'),
+        aspectRatio: 16 / 9,
+      };
     }
 
     if (rawUrl.includes('youtu.be/')) {
       const id = rawUrl.split('youtu.be/')[1]?.split(/[?&]/)[0];
-      return id ? `https://www.youtube.com/embed/${id}` : null;
+      return id
+        ? {
+          url: `https://www.youtube.com/embed/${id}`,
+          aspectRatio: 16 / 9,
+        }
+        : null;
     }
 
     if (rawUrl.includes('vimeo.com/')) {
       const id = rawUrl.split('vimeo.com/')[1]?.split(/[?&]/)[0];
-      return id ? `https://player.vimeo.com/video/${id}` : null;
+      return id
+        ? {
+          url: `https://player.vimeo.com/video/${id}`,
+          aspectRatio: 16 / 9,
+        }
+        : null;
+    }
+
+    return null;
+  };
+
+  const resolveManualVideoAspectRatio = (item) => {
+    const parsedData = parseDataField(item?.data);
+    const rawLayout = String(
+      item?.video_layout ||
+      item?.video_format ||
+      parsedData?.video_layout ||
+      parsedData?.video_format ||
+      parsedData?.video_orientation ||
+      ''
+    ).toLowerCase();
+
+    if (rawLayout === 'portrait' || rawLayout === 'vertical' || rawLayout === 'retrato') {
+      return 9 / 16;
+    }
+
+    if (rawLayout === 'landscape' || rawLayout === 'horizontal' || rawLayout === 'paisagem') {
+      return 16 / 9;
+    }
+
+    if (rawLayout === 'square' || rawLayout === 'quadrado') {
+      return 1;
     }
 
     return null;
@@ -173,6 +223,34 @@ const TopicContentViewer = () => {
     fetchData();
   }, [topicId]);
 
+  useEffect(() => {
+    setVideoAspectRatio(null);
+  }, [currentIndex, topicId]);
+
+  const getVideoContainerStyle = ({ forcedAspectRatio = null, fallbackAspectRatio = 16 / 9 } = {}) => {
+    const targetAspectRatio = (forcedAspectRatio && Number.isFinite(forcedAspectRatio) && forcedAspectRatio > 0)
+      ? forcedAspectRatio
+      : ((videoAspectRatio && Number.isFinite(videoAspectRatio) && videoAspectRatio > 0)
+        ? videoAspectRatio
+        : fallbackAspectRatio);
+
+    if (targetAspectRatio && Number.isFinite(targetAspectRatio) && targetAspectRatio > 0) {
+      return {
+        aspectRatio: `${targetAspectRatio}`,
+        width: '100%',
+        maxWidth: targetAspectRatio < 1 ? '420px' : '100%',
+        margin: '0 auto',
+      };
+    }
+
+    return {
+      aspectRatio: '16 / 9',
+      width: '100%',
+      maxWidth: '100%',
+      margin: '0 auto',
+    };
+  };
+
   const handleNext = () => {
     if (currentIndex < content.length - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -232,11 +310,17 @@ const TopicContentViewer = () => {
 
               {/* Content Renderers */}
               {currentItem.type === 'video' && (() => {
-                const embedUrl = getVideoEmbedUrl(currentItem.url);
+                const embedInfo = getVideoEmbedInfo(currentItem.url);
+                const embedUrl = embedInfo?.url || null;
+                const embedAspectRatio = embedInfo?.aspectRatio || (16 / 9);
+                const manualAspectRatio = resolveManualVideoAspectRatio(currentItem);
 
                 if (embedUrl) {
                   return (
-                    <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+                    <div
+                      className="bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800"
+                      style={getVideoContainerStyle({ forcedAspectRatio: manualAspectRatio, fallbackAspectRatio: embedAspectRatio })}
+                    >
                       <iframe
                         src={embedUrl}
                         className="w-full h-full"
@@ -249,8 +333,21 @@ const TopicContentViewer = () => {
                 }
 
                 return (
-                  <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800 flex items-center justify-center">
-                    <video controls className="w-full h-full" src={buildProtectedUrl(currentItem.url)}>
+                  <div
+                    className="bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800 flex items-center justify-center"
+                    style={getVideoContainerStyle({ forcedAspectRatio: manualAspectRatio })}
+                  >
+                    <video
+                      controls
+                      className="w-full h-full object-contain"
+                      src={buildProtectedUrl(currentItem.url)}
+                      onLoadedMetadata={(event) => {
+                        const { videoWidth, videoHeight } = event.currentTarget;
+                        if (videoWidth > 0 && videoHeight > 0) {
+                          setVideoAspectRatio(videoWidth / videoHeight);
+                        }
+                      }}
+                    >
                       Seu navegador não suporta a tag de vídeo.
                     </video>
                   </div>
