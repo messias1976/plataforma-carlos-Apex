@@ -29,12 +29,23 @@ const SubjectsManagement = () => {
     const [selectedSubjectIdForTopic, setSelectedSubjectIdForTopic] = useState(null);
     const [selectedTopicForEditor, setSelectedTopicForEditor] = useState(null);
 
+    const extractList = (response) => {
+        if (Array.isArray(response)) return response;
+        if (Array.isArray(response?.data)) return response.data;
+        if (Array.isArray(response?.data?.data)) return response.data.data;
+        if (Array.isArray(response?.items)) return response.items;
+        if (Array.isArray(response?.results)) return response.results;
+        return [];
+    };
+
     const areas = [
         { id: 'linguagens', label: t('areas.linguagens'), color: 'text-blue-400', border: 'border-blue-500/20' },
         { id: 'matematica', label: t('areas.matematica'), color: 'text-purple-400', border: 'border-purple-500/20' },
         { id: 'natureza', label: t('areas.natureza'), color: 'text-emerald-400', border: 'border-emerald-500/20' },
         { id: 'humanas', label: t('areas.humanas'), color: 'text-orange-400', border: 'border-orange-500/20' },
     ];
+
+    const safeSubjects = Array.isArray(subjects) ? subjects : [];
 
     useEffect(() => {
         fetchData();
@@ -44,22 +55,31 @@ const SubjectsManagement = () => {
         setLoading(true);
         try {
             // Fetch Subjects
-            const subData = await api.subjects.getAll();
-            setSubjects(subData || []);
+            const subjectsResponse = await api.subjects.getAll();
+            const subjectsList = extractList(subjectsResponse);
+            setSubjects(subjectsList);
 
             // Fetch Topics for all subjects
-            if (subData?.length) {
-                const topicData = await api.topics.getAll();
+            if (subjectsList.length > 0) {
+                const topicsResponse = await api.topics.getAll();
+                const topicData = extractList(topicsResponse);
                 // Group topics by subject_id
                 const topicsMap = {};
                 topicData?.forEach(topic => {
-                    if (!topicsMap[topic.subject_id]) topicsMap[topic.subject_id] = [];
-                    topicsMap[topic.subject_id].push(topic);
+                    const subjectKey = topic?.subject_id != null ? String(topic.subject_id) : null;
+                    if (!subjectKey) return;
+                    if (!topicsMap[subjectKey]) topicsMap[subjectKey] = [];
+                    topicsMap[subjectKey].push(topic);
                 });
                 setTopics(topicsMap);
+            } else {
+                setTopics({});
             }
         } catch (error) {
             console.error('Error fetching subjects:', error);
+            toast({ title: t('common.error'), description: 'Falha ao carregar matérias.', variant: 'destructive' });
+            setSubjects([]);
+            setTopics({});
         } finally {
             setLoading(false);
         }
@@ -121,7 +141,7 @@ const SubjectsManagement = () => {
 
             <div className="grid grid-cols-1 gap-6">
                 {areas.map(area => {
-                    const areaSubjects = subjects.filter(s => s.area === area.id);
+                    const areaSubjects = safeSubjects.filter(s => s.area === area.id);
                     return (
                         <Card key={area.id} className={`bg-slate-900 border-slate-800 ${area.border}`}>
                             <CardHeader className="py-4 border-b border-slate-800/50">
@@ -140,7 +160,7 @@ const SubjectsManagement = () => {
                                 ) : (
                                     <Accordion type="single" collapsible className="w-full">
                                         {areaSubjects.map(subject => (
-                                            <AccordionItem key={subject.id} value={subject.id} className="border-b border-slate-800 last:border-0">
+                                            <AccordionItem key={subject.id} value={String(subject.id)} className="border-b border-slate-800 last:border-0">
                                                 <div className="flex items-center justify-between p-4 hover:bg-slate-800/30 transition-colors">
                                                     <AccordionTrigger className="hover:no-underline py-0 flex-1">
                                                         <span className="font-semibold text-white">{subject.name}</span>
@@ -179,10 +199,10 @@ const SubjectsManagement = () => {
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        {(topics[subject.id] || []).length === 0 ? (
+                                                        {(topics[String(subject.id)] || []).length === 0 ? (
                                                             <p className="text-sm text-slate-600">{t('admin.subjects.noTopics')}</p>
                                                         ) : (
-                                                            (topics[subject.id] || []).map(topic => (
+                                                            (topics[String(subject.id)] || []).map(topic => (
                                                                 <div key={topic.id} className="flex items-center justify-between bg-slate-900 p-3 rounded border border-slate-800 group hover:border-slate-600 transition-all">
                                                                     <div className="flex items-center gap-3">
                                                                         <span className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-slate-400 font-mono">

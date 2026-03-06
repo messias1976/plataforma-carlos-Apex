@@ -32,6 +32,17 @@ const SubjectEditor = ({ isOpen, onClose, topic }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
 
+    const extractList = (response) => {
+        if (Array.isArray(response)) return response;
+        if (Array.isArray(response?.data)) return response.data;
+        if (Array.isArray(response?.data?.data)) return response.data.data;
+        if (Array.isArray(response?.items)) return response.items;
+        if (Array.isArray(response?.results)) return response.results;
+        return [];
+    };
+
+    const safeContentList = Array.isArray(contentList) ? contentList : [];
+
     useEffect(() => {
         if (topic && isOpen) {
             fetchContent();
@@ -42,10 +53,12 @@ const SubjectEditor = ({ isOpen, onClose, topic }) => {
         if (!topic) return;
         setLoading(true);
         try {
-            const data = await api.topicContent.getAll(topic.id);
-            setContentList(data || []);
+            const response = await api.topicContent.getAll(topic.id);
+            const list = extractList(response);
+            setContentList(list);
         } catch (error) {
             console.error('Error fetching content:', error);
+            setContentList([]);
         } finally {
             setLoading(false);
         }
@@ -79,7 +92,7 @@ const SubjectEditor = ({ isOpen, onClose, topic }) => {
                 content_type: activeTab,
                 url: finalUrl,
                 content_text: activeTab === 'text' ? editorData.content_text : null,
-                order_index: contentList.length + 1
+                order_index: safeContentList.length + 1
             };
 
             if (isEditing && typeof isEditing === 'string') {
@@ -166,7 +179,7 @@ const SubjectEditor = ({ isOpen, onClose, topic }) => {
                             </Button>
                         </div>
                         <div className="space-y-2">
-                            {contentList.map(item => (
+                            {safeContentList.map(item => (
                                 <div key={item.id} className="p-3 bg-slate-900 rounded border border-slate-800 hover:border-slate-600 group">
                                     <div className="flex justify-between items-start mb-2">
                                         <span className="text-xs uppercase bg-slate-800 px-1.5 rounded text-slate-400 border border-slate-700">{item.type}</span>
@@ -182,7 +195,7 @@ const SubjectEditor = ({ isOpen, onClose, topic }) => {
                                     <p className="font-medium text-sm truncate">{item.title}</p>
                                 </div>
                             ))}
-                            {contentList.length === 0 && <p className="text-sm text-slate-500 text-center py-4">Vazio</p>}
+                            {safeContentList.length === 0 && <p className="text-sm text-slate-500 text-center py-4">Vazio</p>}
                         </div>
                     </div>
 
