@@ -29,7 +29,7 @@ class UserController {
             $data = getJsonBody();
             
             // Define which fields can be updated
-            $allowedFields = ['full_name', 'phone', 'birthdate', 'avatar_url', 'xp', 'coins', 'level'];
+            $allowedFields = ['full_name', 'phone', 'birthdate', 'avatar_url', 'xp', 'coins', 'level', 'language_preference'];
             $updateData = [];
 
             foreach ($allowedFields as $field) {
