@@ -52,6 +52,17 @@
     "createAccount": "Create your account"
   },
   "landing": {
+    "metaTitle": "APEX - Learning Platform",
+    "metaDescription": "Learn any subject with AI.",
+    "heroTitle": "Master Knowledge",
+    "heroSubtitle": "APEX is an adaptive learning platform that uses Artificial Intelligence to personalize your studies. Access virtual teachers, dynamic exams, and compete in knowledge challenges with other students.",
+    "heroCtaAuth": "Access Platform",
+    "heroCtaGuest": "Get Started",
+    "headerDashboard": "Dashboard",
+    "headerLogin": "Login",
+    "popularBadge": "Popular",
+    "bestValueBadge": "Best Value",
+    "footer": "2026 APEX Education.",
     "title": "Master Any Subject with AI",
     "subtitle": "Intelligent learning platform with tutorials, exams and AI teacher",
     "free": {
@@ -296,6 +307,55 @@
     "student": "STUDENT",
     "level": "LEVEL",
     "accuracy": "ACCURACY"
+  },
+  "planSelection": {
+    "title": "Choose Your Level",
+    "subtitle": "Unlock your full potential with our adaptive plans.",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "footer": "2026 APEX Education. All rights reserved.",
+    "popularBadge": "Popular",
+    "bestValueBadge": "Best Value",
+    "free": {
+      "name": "Free Trial",
+      "price": "$0.00",
+      "description": "Full access for 48 hours",
+      "cta": "Unavailable",
+      "features": [
+        "Theoretical Exams",
+        "Study Zone",
+        "AI Agent (Limited)",
+        "1v1 Battle",
+        "Global Ranking"
+      ]
+    },
+    "standard": {
+      "name": "Standard",
+      "price": "$35.66/month",
+      "description": "For focused students",
+      "cta": "Subscribe to Standard",
+      "features": [
+        "Theoretical Exams",
+        "Study Zone",
+        "AI Agent (Unlimited)",
+        "1v1 Battle",
+        "Global Ranking"
+      ]
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "$65.90/month",
+      "description": "The complete experience",
+      "cta": "Current Plan",
+      "features": [
+        "Theoretical Exams",
+        "Study Zone",
+        "AI Agent (Personalities)",
+        "1v1 Battle",
+        "Global Ranking",
+        "Detailed Feedback"
+      ]
+    }
   },
   "subscription": {
     "free": { "name": "Free" },

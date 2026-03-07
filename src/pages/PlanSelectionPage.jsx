@@ -35,56 +35,37 @@ const PlanSelectionPage = () => {
   const plans = [
     {
       id: 'free',
-      name: "Free Trial",
-      price: "R$ 0,00",
-      description: "Acesso completo por 48 horas",
-      features: [
-        'Provas Teóricas',
-        'Zona de Estudos',
-        'Agente AI (Limitado)',
-        '1x1 Tournament',
-        'Ranking Global'
-      ],
-      cta: "Indisponível",
+      name: t('planSelection.free.name'),
+      price: t('planSelection.free.price'),
+      description: t('planSelection.free.description'),
+      features: t('planSelection.free.features'),
+      cta: t('planSelection.free.cta'),
       disabled: true,
       color: 'from-slate-700 to-slate-800',
       icon: Zap
     },
     {
       id: 'standard',
-      name: "Standard",
-      price: "R$ 35,66/mês",
-      description: "Para estudantes focados",
-      features: [
-        'Provas Teóricas',
-        'Zona de Estudos',
-        'Agente AI (Ilimitado)',
-        '1x1 Tournament',
-        'Ranking Global'
-      ],
-      cta: "Assinar Standard",
+      name: t('planSelection.standard.name'),
+      price: t('planSelection.standard.price'),
+      description: t('planSelection.standard.description'),
+      features: t('planSelection.standard.features'),
+      cta: t('planSelection.standard.cta'),
       disabled: false,
       color: 'from-blue-600 to-indigo-700',
-      badge: 'Popular',
+      badge: t('planSelection.popularBadge'),
       icon: Star
     },
     {
       id: 'premium',
-      name: "Premium",
-      price: "R$ 65,90/mês",
-      description: "A experiência completa",
-      features: [
-        'Provas Teóricas',
-        'Zona de Estudos',
-        'Agente AI (Personalidades)',
-        '1x1 Tournament',
-        'Ranking Global',
-        'Feedback Detalhado'
-      ],
-      cta: "Plano Atual",
+      name: t('planSelection.premium.name'),
+      price: t('planSelection.premium.price'),
+      description: t('planSelection.premium.description'),
+      features: t('planSelection.premium.features'),
+      cta: t('planSelection.premium.cta'),
       disabled: false, // In a real app, might be disabled if already subscribed
       color: 'from-orange-500 to-red-600',
-      badge: 'Best Value',
+      badge: t('planSelection.bestValueBadge'),
       icon: Crown
     }
   ];
@@ -127,7 +108,7 @@ const PlanSelectionPage = () => {
                 onClick={handleDashboardClick}
                 className="bg-neon-600 hover:bg-neon-700 text-white"
              >
-                Dashboard
+               {t('planSelection.dashboard')}
              </Button>
           ) : (
              <Button
@@ -137,7 +118,7 @@ const PlanSelectionPage = () => {
                 className="text-slate-500 hover:text-white"
             >
                 <Lock className="w-4 h-4 mr-2" />
-                Login
+               {t('planSelection.login')}
             </Button>
           )}
         </div>
@@ -152,10 +133,10 @@ const PlanSelectionPage = () => {
             className="text-center max-w-3xl mb-12"
         >
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400 tracking-tight">
-                Escolha seu Nível
+              {t('planSelection.title')}
             </h1>
             <p className="text-xl text-slate-400 leading-relaxed">
-                Desbloqueie todo o potencial da sua mente com nossos planos adaptativos.
+              {t('planSelection.subtitle')}
             </p>
         </motion.div>
 
@@ -230,7 +211,7 @@ const PlanSelectionPage = () => {
       </main>
       
       <footer className="relative z-10 w-full py-6 text-center text-slate-600 text-sm">
-        <p>© 2026 APEX Education. Todos os direitos reservados.</p>
+        <p>{`© ${t('planSelection.footer')}`}</p>
       </footer>
     </div>
   );

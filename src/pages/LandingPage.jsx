@@ -34,56 +34,41 @@ const LandingPage = () => {
     const plans = [
         {
             id: 'free',
-            name: "Plano Gratuito",
-            price: "Grátis",
-            features: [
-                "Acesso limitado à Zona de Estudo",
-                "10 perguntas diárias",
-                "Perfil de Estudante Básico"
-            ],
-            cta: "Começar Agora",
+            name: t('landing.free.title'),
+            price: t('landing.free.price'),
+            features: t('landing.free.features'),
+            cta: t('landing.free.cta'),
             color: 'from-slate-700 to-slate-800',
             buttonVariant: 'outline',
             badge: null
         },
         {
             id: 'standard',
-            name: "Plano Padrão",
-            price: "35,66/mês",
-            features: [
-                "Acesso a todas as matérias",
-                "Exames Teóricos Ilimitados",
-                "Certificados de Conclusão",
-                "Sem anúncios"
-            ],
-            cta: "Escolher Plano",
+            name: t('landing.standard.title'),
+            price: t('landing.standard.price'),
+            features: t('landing.standard.features'),
+            cta: t('landing.standard.cta'),
             color: 'from-blue-600 to-indigo-700',
             buttonVariant: 'default',
-            badge: 'Popular'
+            badge: t('landing.popularBadge')
         },
         {
             id: 'premium',
-            name: "Plano Premium",
-            price: "65,90/mês",
-            features: [
-                "Tudo do Padrão",
-                "Mentor IA 24/7",
-                "Escape Room Educativo",
-                "Análise de Desempenho Avançada",
-                "Prioridade no Suporte"
-            ],
-            cta: "Escolher Plano",
+            name: t('landing.premium.title'),
+            price: t('landing.premium.price'),
+            features: t('landing.premium.features'),
+            cta: t('landing.premium.cta'),
             color: 'from-orange-500 to-red-600',
             buttonVariant: 'default',
-            badge: 'Best Value'
+            badge: t('landing.bestValueBadge')
         }
     ];
 
     return (
         <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col overflow-x-hidden">
             <Helmet>
-                <title>APEX - Plataforma de Aprendizado</title>
-                <meta name="description" content="Aprenda qualquer assunto com IA." />
+                <title>{t('landing.metaTitle')}</title>
+                <meta name="description" content={t('landing.metaDescription')} />
             </Helmet>
 
             {/* Header */}
@@ -113,7 +98,7 @@ const LandingPage = () => {
                             onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
                             className="bg-green-600 hover:bg-green-700 text-white hidden sm:flex"
                         >
-                            {isAuthenticated ? 'Dashboard' : 'Login'}
+                            {isAuthenticated ? t('landing.headerDashboard') : t('landing.headerLogin')}
                         </Button>
                     </div>
                 </div>
@@ -134,7 +119,7 @@ const LandingPage = () => {
                             transition={{ duration: 0.6 }}
                             className="text-5xl md:text-7xl font-bold tracking-tight text-white"
                         >
-                            Domine o Conhecimento
+                            {t('landing.heroTitle')}
                         </motion.h1>
 
                         <motion.p
@@ -143,8 +128,7 @@ const LandingPage = () => {
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed"
                         >
-                            O APEX é uma plataforma de aprendizado adaptativo que utiliza Inteligência Artificial para personalizar seus estudos.
-                            Acesse professores virtuais, provas dinâmicas e dispute conhecimento com outros alunos.
+                            {t('landing.heroSubtitle')}
                         </motion.p>
 
                         <motion.div
@@ -158,7 +142,7 @@ const LandingPage = () => {
                                 onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
                                 className="h-14 px-12 text-lg bg-green-600 hover:bg-green-700 text-white font-bold rounded-full shadow-lg shadow-green-900/20 transition-all hover:scale-105"
                             >
-                                {isAuthenticated ? 'Acessar Plataforma' : 'Começar Agora'}
+                                {isAuthenticated ? t('landing.heroCtaAuth') : t('landing.heroCtaGuest')}
                             </Button>
                         </motion.div>
                     </div>
@@ -233,7 +217,7 @@ const LandingPage = () => {
 
             <footer className="py-8 border-t border-slate-900 bg-slate-950">
                 <div className="container mx-auto px-4 text-center text-slate-600 text-sm">
-                    © 2026 APEX Education.
+                    {`© ${t('landing.footer')}`}
                 </div>
             </footer>
         </div>

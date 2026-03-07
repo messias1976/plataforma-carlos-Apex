@@ -52,6 +52,17 @@
     "createAccount": "Crie sua conta"
   },
   "landing": {
+    "metaTitle": "APEX - Plataforma de Aprendizado",
+    "metaDescription": "Aprenda qualquer assunto com IA.",
+    "heroTitle": "Domine o Conhecimento",
+    "heroSubtitle": "O APEX e uma plataforma de aprendizado adaptativo que utiliza Inteligencia Artificial para personalizar seus estudos. Acesse professores virtuais, provas dinamicas e dispute conhecimento com outros alunos.",
+    "heroCtaAuth": "Acessar Plataforma",
+    "heroCtaGuest": "Comecar Agora",
+    "headerDashboard": "Dashboard",
+    "headerLogin": "Login",
+    "popularBadge": "Popular",
+    "bestValueBadge": "Melhor Custo-Beneficio",
+    "footer": "2026 APEX Education.",
     "title": "Domine Qualquer Assunto com IA",
     "subtitle": "Plataforma de aprendizado inteligente com tutoriais, exames e professor IA",
     "free": {
@@ -296,6 +307,55 @@
     "student": "ESTUDANTE",
     "level": "NÍVEL",
     "accuracy": "PRECISÃO"
+  },
+  "planSelection": {
+    "title": "Escolha seu Nivel",
+    "subtitle": "Desbloqueie todo o potencial da sua mente com nossos planos adaptativos.",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "footer": "2026 APEX Education. Todos os direitos reservados.",
+    "popularBadge": "Popular",
+    "bestValueBadge": "Melhor Custo-Beneficio",
+    "free": {
+      "name": "Teste Gratis",
+      "price": "R$ 0,00",
+      "description": "Acesso completo por 48 horas",
+      "cta": "Indisponivel",
+      "features": [
+        "Provas Teoricas",
+        "Zona de Estudos",
+        "Agente AI (Limitado)",
+        "Batalha 1x1",
+        "Ranking Global"
+      ]
+    },
+    "standard": {
+      "name": "Standard",
+      "price": "R$ 35,66/mes",
+      "description": "Para estudantes focados",
+      "cta": "Assinar Standard",
+      "features": [
+        "Provas Teoricas",
+        "Zona de Estudos",
+        "Agente AI (Ilimitado)",
+        "Batalha 1x1",
+        "Ranking Global"
+      ]
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "R$ 65,90/mes",
+      "description": "A experiencia completa",
+      "cta": "Plano Atual",
+      "features": [
+        "Provas Teoricas",
+        "Zona de Estudos",
+        "Agente AI (Personalidades)",
+        "Batalha 1x1",
+        "Ranking Global",
+        "Feedback Detalhado"
+      ]
+    }
   },
   "subscription": {
     "free": { "name": "Gratuito" },

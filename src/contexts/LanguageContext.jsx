@@ -18,11 +18,25 @@ const translations = {
   'en': enUS
 };
 
+const normalizeLanguage = (lang) => {
+  if (!lang || typeof lang !== 'string') return 'pt';
+
+  const normalized = lang.trim().toLowerCase();
+
+  if (normalized === 'pt' || normalized === 'pt-br' || normalized === 'pt_br') return 'pt';
+  if (normalized === 'en' || normalized === 'en-us' || normalized === 'en_us') return 'en';
+
+  if (normalized.startsWith('pt')) return 'pt';
+  if (normalized.startsWith('en')) return 'en';
+
+  return 'pt';
+};
+
 export const LanguageProvider = ({ children }) => {
   // Default to 'pt' if nothing in localStorage
   const [language, setLanguage] = useState(() => {
     const storedLang = localStorage.getItem('apex_lang');
-    return storedLang || 'pt';
+    return normalizeLanguage(storedLang || 'pt');
   });
 
   // Sync with backend on mount if user is logged in
@@ -32,9 +46,12 @@ export const LanguageProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         if (token) {
           const profile = await api.user.getProfile();
-          if (profile?.language_preference && profile.language_preference !== language) {
-            setLanguage(profile.language_preference);
-            localStorage.setItem('apex_lang', profile.language_preference);
+          if (profile?.language_preference) {
+            const normalizedPreference = normalizeLanguage(profile.language_preference);
+            if (normalizedPreference !== language) {
+              setLanguage(normalizedPreference);
+              localStorage.setItem('apex_lang', normalizedPreference);
+            }
           }
         }
       } catch (error) {
@@ -46,14 +63,16 @@ export const LanguageProvider = ({ children }) => {
   }, []);
 
   const changeLanguage = async (lang) => {
-    setLanguage(lang);
-    localStorage.setItem('apex_lang', lang);
+    const normalizedLang = normalizeLanguage(lang);
+
+    setLanguage(normalizedLang);
+    localStorage.setItem('apex_lang', normalizedLang);
 
     // Persist to backend if authenticated
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await api.user.updateProfile({ language_preference: lang });
+        await api.user.updateProfile({ language_preference: normalizedLang });
       }
     } catch (error) {
       console.error("Failed to sync language preference:", error);
