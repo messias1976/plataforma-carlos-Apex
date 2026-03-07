@@ -65,6 +65,12 @@ export const LanguageProvider = ({ children }) => {
   const changeLanguage = async (lang) => {
     const normalizedLang = normalizeLanguage(lang);
 
+    // Avoid no-op profile updates when the selected language is already active.
+    if (normalizedLang === language) {
+      localStorage.setItem('apex_lang', normalizedLang);
+      return;
+    }
+
     setLanguage(normalizedLang);
     localStorage.setItem('apex_lang', normalizedLang);
 
@@ -75,6 +81,10 @@ export const LanguageProvider = ({ children }) => {
         await api.user.updateProfile({ language_preference: normalizedLang });
       }
     } catch (error) {
+      if (error?.message?.includes('Nenhum campo para atualizar')) {
+        console.debug('Language already synced with backend.');
+        return;
+      }
       console.error("Failed to sync language preference:", error);
     }
   };
