@@ -1,43 +1,109 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Share2, Heart, MessageCircle, X, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Confetti from 'react-confetti';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import ProtectedFeature from '@/components/subscription/ProtectedFeature';
+import { useAuth } from '@/contexts/MockAuthContext';
 
-const CARDS = [
-  {
-    id: 1,
-    topic: "Física",
-    title: "Primeira Lei de Newton",
-    question: "Um objeto em repouso permanece em repouso a menos que uma força atue sobre ele?",
-    options: ["Verdadeiro", "Falso"],
-    correctAnswer: 0,
-    explanation: "Correto! Isso é a inércia - objetos tendem a manter seu estado de movimento.",
-    color: "from-blue-600 to-indigo-700"
-  },
-  {
-    id: 2,
-    topic: "Biologia",
-    title: "Fotossíntese",
-    question: "As plantas produzem oxigênio durante a fotossíntese?",
-    options: ["Sim", "Não"],
-    correctAnswer: 0,
-    explanation: "Exato! As plantas liberam O₂ como subproduto da fotossíntese.",
-    color: "from-green-600 to-emerald-700"
-  }
+const SWIPE_TOPICS = [
+  { disciplina: 'fisica', tema: 'Leis de Newton' },
+  { disciplina: 'biologia', tema: 'Fotossintese e respiracao celular' },
+  { disciplina: 'matematica', tema: 'Porcentagem e regra de tres' },
+  { disciplina: 'historia', tema: 'Revolucao Industrial' },
+  { disciplina: 'portugues', tema: 'Interpretacao de texto' },
+  { disciplina: 'geral', tema: 'Atualidades e raciocinio logico' },
 ];
+
+const CARD_COLORS = [
+  'from-blue-600 to-indigo-700',
+  'from-green-600 to-emerald-700',
+  'from-fuchsia-600 to-rose-700',
+  'from-cyan-600 to-sky-700',
+  'from-orange-600 to-amber-700',
+];
+
+const normalizeQuestions = (payload) => {
+  const questions = payload?.data?.questions || payload?.questions || [];
+
+  if (!Array.isArray(questions)) {
+    return [];
+  }
+
+  return questions
+    .map((question, idx) => {
+      const options = Array.isArray(question?.options) ? question.options : [];
+      const correctAnswer = Number.isInteger(question?.correct) ? question.correct : -1;
+
+      if (!question?.question || options.length < 2 || correctAnswer < 0 || correctAnswer >= options.length) {
+        return null;
+      }
+
+      return {
+        id: `${question.question}-${idx}`,
+        topic: payload?.data?.subject || payload?.subject || 'Geral',
+        question: question.question,
+        options,
+        correctAnswer,
+        color: CARD_COLORS[idx % CARD_COLORS.length],
+      };
+    })
+    .filter(Boolean);
+};
 
 const SwipeLearning = () => {
   const { t } = useTranslation();
+  const { api } = useAuth();
+  const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
   const { width, height } = useWindowSize();
+
+  const selectedTopic = useMemo(() => {
+    const randomIndex = Math.floor(Math.random() * SWIPE_TOPICS.length);
+    return SWIPE_TOPICS[randomIndex];
+  }, [refreshKey]);
+
+  const loadAiCards = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError('');
+
+    try {
+      const payload = await api('/ai/generate-exam', {
+        method: 'POST',
+        body: JSON.stringify({
+          disciplina: selectedTopic.disciplina,
+          tema: selectedTopic.tema,
+          nivel: 'medio',
+        }),
+      });
+
+      const normalized = normalizeQuestions(payload);
+
+      if (normalized.length === 0) {
+        throw new Error('A IA nao retornou perguntas validas para o Swipe Learning.');
+      }
+
+      setCards(normalized);
+      setCurrentIndex(0);
+    } catch (error) {
+      setCards([]);
+      setLoadError(error?.message || 'Nao foi possivel carregar perguntas da IA agora.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [api, selectedTopic.disciplina, selectedTopic.tema]);
+
+  useEffect(() => {
+    loadAiCards();
+  }, [loadAiCards]);
 
   const handleAnswer = (answerIndex) => {
     const correct = answerIndex === currentCard.correctAnswer;
@@ -58,13 +124,20 @@ const SwipeLearning = () => {
     setDirection(1);
     setShowAnswer(false);
     setIsCorrect(null);
+
+    const isLastCard = currentIndex >= cards.length - 1;
+
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % CARDS.length);
+      if (isLastCard) {
+        setRefreshKey((prev) => prev + 1);
+      } else {
+        setCurrentIndex((prev) => prev + 1);
+      }
       setDirection(0);
     }, 200);
   };
 
-  const currentCard = CARDS[currentIndex];
+  const currentCard = cards[currentIndex];
 
   const variants = {
     enter: { scale: 0.9, opacity: 0, y: 50 },
@@ -83,9 +156,28 @@ const SwipeLearning = () => {
         {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={200} gravity={0.3} />}
         
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            {t('swipe.title')} <span className="text-xs bg-emerald-500 text-slate-900 px-2 py-0.5 rounded">Beta</span>
+            {t('dashboard.tabs.swipe')} <span className="text-xs bg-emerald-500 text-slate-900 px-2 py-0.5 rounded">Beta</span>
         </h2>
+
+        {isLoading && (
+          <div className="w-full rounded-2xl border border-white/10 bg-slate-900/70 p-6 text-center text-white/80">
+            Carregando perguntas da IA...
+          </div>
+        )}
+
+        {!isLoading && loadError && (
+          <div className="w-full rounded-2xl border border-red-500/30 bg-red-900/20 p-6 text-center text-red-200">
+            <p className="mb-4">{loadError}</p>
+            <Button
+              onClick={() => setRefreshKey((prev) => prev + 1)}
+              className="bg-red-500/80 hover:bg-red-500 text-white"
+            >
+              {t('common.tryAgain')}
+            </Button>
+          </div>
+        )}
         
+        {!isLoading && !loadError && currentCard && (
         <div className="relative w-full h-[500px]">
             <AnimatePresence custom={direction}>
             <motion.div
@@ -107,7 +199,7 @@ const SwipeLearning = () => {
                          <div className="flex flex-col items-center">
                             <span className="text-6xl mb-4">{isCorrect ? '🎉' : '😢'}</span>
                             <span className={`text-3xl font-bold ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
-                                {isCorrect ? t('swipe.correct') : t('swipe.wrong')}
+                              {isCorrect ? 'Acertou!' : 'Errou!'}
                             </span>
                          </div>
                      </motion.div>
@@ -131,7 +223,7 @@ const SwipeLearning = () => {
                             {currentCard.options.map((option, idx) => (
                                 <Button
                                     key={idx}
-                                    onClick={() => !showAnswer && handleAnswer(idx)}
+                                  onClick={() => !showAnswer && handleAnswer(idx)}
                                     className={`w-full text-white border-2 border-white/30 font-bold text-lg h-12 ${
                                         showAnswer 
                                             ? idx === currentCard.correctAnswer 
@@ -139,6 +231,7 @@ const SwipeLearning = () => {
                                                 : 'bg-white/10'
                                             : 'bg-white/20 hover:bg-white/30'
                                     }`}
+                                  disabled={showAnswer}
                                 >
                                     {option}
                                 </Button>
@@ -149,6 +242,7 @@ const SwipeLearning = () => {
             </motion.div>
             </AnimatePresence>
         </div>
+          )}
         </div>
     </ProtectedFeature>
   );
